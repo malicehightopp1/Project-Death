@@ -22,7 +22,7 @@ For this project I wanted to combine everything ive learned so far and push it e
 
 # Architecture Overview
 	
-## Core Systems
+# Core Systems
 
 # Controls
 
