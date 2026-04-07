@@ -36,10 +36,9 @@ public:
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Dodge", meta = (Clampmin = "0", ClampMax = "5000")) float DodgeForce = 200.0f;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Dodge", meta = (ClampMin = "0", ClampMax = "5.0")) float DodgeDuration = 0.5f;
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement|Dodge") bool bIsDodging = false;
+	UPROPERTY(BlueprintReadOnly, Category = "Movement|Dodge") bool bIsDodging = false;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Dodge") FVector DodgeDirection;
 	
-protected:
-	UPROPERTY(BlueprintReadOnly, Category = "Player | PlayerComp") class UAnimInstance* PlayerAnimInstance;
 	
 private:
 	
@@ -48,7 +47,6 @@ private:
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	UFUNCTION(BlueprintCallable, Category = "Movement") void PlayerDodge();
 	UFUNCTION(BlueprintCallable, Category = "Movement") void PlayerDodgeEnd();
-	FTimerHandle DodgeTimerHandle;
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// Components -----------------------------------------------------------------------------------------------------

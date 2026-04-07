@@ -72,15 +72,15 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 void ABaseCharacter::PlayerDodge() //dodge for player
 {
-	if (bIsDodging) return; //dont allow player to dodge if already dodging
+	if (bIsDodging) return; //don't allow player to dodge if already dodging
 
 	bIsDodging = true;
 
 	// Get the direction based on player input
 	// Uses last movement input so dodge goes the direction you're moving
-	FVector DodgeDirection = GetLastMovementInputVector();
+	DodgeDirection = GetLastMovementInputVector();
 	
-	if (DodgeDirection.IsNearlyZero()) //if there no input dodgfe backwards
+	if (DodgeDirection.IsNearlyZero()) //if there no input dodge backwards
 	{
 		DodgeDirection = -GetActorForwardVector();
 	}
@@ -88,19 +88,12 @@ void ABaseCharacter::PlayerDodge() //dodge for player
 	DodgeDirection.Z = 0.f; // keep it horizontal
 	DodgeDirection.Normalize();
 
-	LaunchCharacter(DodgeDirection * DodgeForce, true, true); //pushing the player
-
-	// Reset after dodge duration
-	GetWorldTimerManager().SetTimer(
-		DodgeTimerHandle,
-		this,
-		&ABaseCharacter::PlayerDodgeEnd,
-		DodgeDuration,
-		false
-	);
+	//LaunchCharacter(DodgeDirection * DodgeForce, true, true);
+	SetActorRotation(DodgeDirection.ToOrientationRotator());
 }
 
 void ABaseCharacter::PlayerDodgeEnd() //reseting the dodge
 {
 	bIsDodging = false;
+	DodgeDirection = FVector::ZeroVector;
 }
