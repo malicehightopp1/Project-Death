@@ -5,6 +5,7 @@
 
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 
 // Sets default values
@@ -16,6 +17,9 @@ ABaseCharacter::ABaseCharacter()
 	//Default component setups
 	PlayerMeshComponent = GetMesh();
 	PlayerCapsuleComponent = GetCapsuleComponent();
+	
+	//So root motion will work for dodge
+	GetCharacterMovement()->bAllowPhysicsRotationDuringAnimRootMotion = true;
 	
 	//Setting player controller rotation
 	bUseControllerRotationPitch = false;
@@ -29,7 +33,7 @@ ABaseCharacter::ABaseCharacter()
 	
 	//Spring arm defualt values
 	PlayerBloomComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("PlayerBloomComponent"));
-	PlayerBloomComponent->SetupAttachment(PlayerCapsuleComponent);
+	PlayerBloomComponent->SetupAttachment(RootComponent);
 	PlayerBloomComponent->TargetArmLength = 450.0f; //default length from player
 	PlayerBloomComponent->SocketOffset.Z = 100.0f; //default length above player
 	
@@ -66,3 +70,37 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 }
 
+void ABaseCharacter::PlayerDodge() //dodge for player
+{
+	if (bIsDodging) return; //dont allow player to dodge if already dodging
+
+	bIsDodging = true;
+
+	// Get the direction based on player input
+	// Uses last movement input so dodge goes the direction you're moving
+	FVector DodgeDirection = GetLastMovementInputVector();
+	
+	if (DodgeDirection.IsNearlyZero()) //if there no input dodgfe backwards
+	{
+		DodgeDirection = -GetActorForwardVector();
+	}
+
+	DodgeDirection.Z = 0.f; // keep it horizontal
+	DodgeDirection.Normalize();
+
+	LaunchCharacter(DodgeDirection * DodgeForce, true, true); //pushing the player
+
+	// Reset after dodge duration
+	GetWorldTimerManager().SetTimer(
+		DodgeTimerHandle,
+		this,
+		&ABaseCharacter::PlayerDodgeEnd,
+		DodgeDuration,
+		false
+	);
+}
+
+void ABaseCharacter::PlayerDodgeEnd() //reseting the dodge
+{
+	bIsDodging = false;
+}

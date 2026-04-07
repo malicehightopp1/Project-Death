@@ -9,6 +9,7 @@
 
 class UCameraComponent;
 class USpringArmComponent;
+class UAnimInstance;
 
 UCLASS()
 class ABaseCharacter : public ACharacter
@@ -30,8 +31,24 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/// Dodge ----------------------------------------------------------------------------------------------------------
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Dodge", meta = (Clampmin = "0", ClampMax = "5000")) float DodgeForce = 200.0f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Dodge", meta = (ClampMin = "0", ClampMax = "5.0")) float DodgeDuration = 0.5f;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Movement|Dodge") bool bIsDodging = false;
+	
+protected:
+	UPROPERTY(BlueprintReadOnly, Category = "Player | PlayerComp") class UAnimInstance* PlayerAnimInstance;
 	
 private:
+	
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/// Dodge ----------------------------------------------------------------------------------------------------------
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	UFUNCTION(BlueprintCallable, Category = "Movement") void PlayerDodge();
+	UFUNCTION(BlueprintCallable, Category = "Movement") void PlayerDodgeEnd();
+	FTimerHandle DodgeTimerHandle;
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// Components -----------------------------------------------------------------------------------------------------
