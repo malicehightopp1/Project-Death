@@ -7,6 +7,9 @@
 #include "GameFramework/Character.h"
 #include "BaseCharacter.generated.h"
 
+struct FInputActionValue;
+class UInventoryManager;
+class UInputAction;
 class UCameraComponent;
 class USpringArmComponent;
 class UAnimInstance;
@@ -30,18 +33,34 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/// Ui ------------------------------------------------------------------------------------------------------------
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	UPROPERTY(EditDefaultsOnly, Category = "Player | UI") UUserWidget* PlayerWidget;
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// Dodge ----------------------------------------------------------------------------------------------------------
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Dodge", meta = (Clampmin = "0", ClampMax = "5000")) float DodgeForce = 200.0f;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Dodge", meta = (ClampMin = "0", ClampMax = "5.0")) float DodgeDuration = 0.5f;
-	UPROPERTY(BlueprintReadOnly, Category = "Movement|Dodge") bool bIsDodging = false;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Movement|Dodge") FVector DodgeDirection;
-	
+	UPROPERTY(BlueprintReadOnly, Category = "Player | Movement | Dodge") bool bIsDodging = false;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Player | Movement | Dodge") FVector DodgeDirection;
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/// Inventory ------------------------------------------------------------------------------------------------------
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	UPROPERTY(EditDefaultsOnly, Category = "Player | Ref") UInventoryManager* InventoryManagerRef;
 	
 private:
-	
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/// Input Action Functions -----------------------------------------------------------------------------------------
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	UFUNCTION() void Interact(const FInputActionValue& Value);
+	UFUNCTION() void InventoryToggle(const FInputActionValue& Value);
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/// Input actions --------------------------------------------------------------------------------------------------
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	UPROPERTY(EditDefaultsOnly, Category = "Player | Player Input") UInputAction* InteractionAction;
+	UPROPERTY(EditDefaultsOnly, Category = "Player | Player Input") UInputAction* InventoryAction;
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// Dodge ----------------------------------------------------------------------------------------------------------
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
