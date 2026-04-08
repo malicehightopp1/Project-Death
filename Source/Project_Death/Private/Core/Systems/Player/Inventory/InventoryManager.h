@@ -48,6 +48,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category="Components|Inventory") bool ItemSwap(int32 SlotIndexA, int32 SlotIndexB);
 	UFUNCTION(BlueprintCallable, Category="Components|Inventory") void DropItem(FName ItemRowName, int32 Quantity, FVector Spawnlocation);
 	FWeaponDataInfo* GetWeaponData(FName ItemRowName);
+	FArmourDataInfo* GetArmourData(FName ItemRowName);
 	
 	// ========================================================================================================
 	// ------ Inventory UI Turn On ----------------------------------------------------------------------------
@@ -70,6 +71,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory Config") int32 MaxSlots = 20;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory Config") UDataTable* ItemDataTable;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory Config") UDataTable* WeaponDataTable;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory Config") UDataTable* ArmourDataTable;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory Config") TArray<FInventorySlot> InventorySlots;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning") TSubclassOf<AItemPickup> ItemPickupClass;
 	// ========================================================================================================

@@ -17,32 +17,46 @@ enum class EItemType : uint8
 	Misc UMETA(DisplayName = "Misc"),
 	All UMETA(DisplayName = "All")
 };
+UENUM(BlueprintType)
+enum class ERarityType : uint8
+{
+	Common UMETA(DisplayName = "Common"),
+	Uncommon UMETA(DisplayName = "Uncommon"),
+	Rare UMETA(DisplayName = "Rare"),
+	Epic UMETA(DisplayName = "Epic"),
+	Legendary UMETA(DisplayName = "Legendary")
+};
 USTRUCT(BlueprintType)
 struct FItemDataInfo : public FTableRowBase
 {
 	GENERATED_BODY()
 	
-	//Item rarity *for mini assignment* ccould just be another struct
+	//Base information
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) FName ItemName;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) FText ItemDescription;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) int32 ItemId;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) UTexture2D* ItemTexture;
+
+	//Shop information
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) int32 BuyPrice;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) int32 SellPrice;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) UTexture2D* ItemTexture;
+
+	//Stacking information
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) bool bIsStackable;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) int32 StackSize;
+
+	//type information
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) EItemType ItemType;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) ERarityType ItemRarity;
+
+	//Item dropping information
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) UStaticMesh* ItemMesh;
 };
 
 // ========================================================================================================
-// ------ Weapon Item Data -------------------------------------------------------------------------------
+// ------ Weapon Item Data --------------------------------------------------------------------------------
 // ========================================================================================================
 
-
-/*
- * makes another data table for just the weapons *STILL CONNECTED TO THE MAIN BASE DATA TABLE ABOVE*
- */
 UENUM(BlueprintType)
 enum class EWeaponDataType : uint8
 {
@@ -59,11 +73,113 @@ struct FWeaponDataInfo : public FTableRowBase
 {
 	GENERATED_BODY()
 
+	//Item search information
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) FName ItemRowName;
+
+	//Weapon specific information
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) int32 BaseDamage;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) float AttackSpeed;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) EWeaponDataType WeaponType;
 };
+
+// ========================================================================================================
+// ------ Armour Item Data --------------------------------------------------------------------------------
+// ========================================================================================================
+UENUM(BlueprintType)
+enum class EArmourType : uint8
+{
+	Helmet UMETA(DisplayName = "Helmet"),
+	Chestplate UMETA(DisplayName = "Chestplate"),
+	Leggings UMETA(DisplayName = "Leggings"),
+	Boots UMETA(DisplayName = "Boots"),
+	Gloves UMETA(DisplayName = "Gloves")
+};
+
+UENUM(BlueprintType)
+enum class EArmourDefenseType : uint8
+{
+	Light UMETA(DisplayName = "Light Weight"),
+	Medium UMETA(DisplayName = "Medium Weight"),
+	Heavy UMETA(DisplayName = "Heavy Weight")
+};
+
+USTRUCT(BlueprintType)
+struct FArmourDataInfo : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) FName ItemRowName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) int32 ArmourDefense;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) EArmourDefenseType ArmourDefenseType;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) EArmourType ArmourType;
+};
+
+// ========================================================================================================
+// ------ Consumable Item Data ----------------------------------------------------------------------------
+// ========================================================================================================
+
+UENUM(BlueprintType)
+enum class EConsumableType : uint8
+{
+	Throwable UMETA(DisplayName = "Throwable"),
+	Consumable UMETA(DisplayName = "Consumable")
+};
+
+USTRUCT(BlueprintType)
+struct FConsumableItemData : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) FName ItemRowName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) EConsumableType ConsumableType;
+};
+
+// ========================================================================================================
+// ------ Accessory Item Data -----------------------------------------------------------------------------
+// ========================================================================================================
+
+UENUM(BlueprintType)
+enum class EAccessoryType : uint8
+{
+	BeltAccessory UMETA(DisplayName = "Belt Accessory"),
+	HandAccessory UMETA(DisplayName = "HandAccessory"),
+	HeadAccessory UMETA(DisplayName = "HeadAccessory"),
+	CharmAccessory UMETA(DisplayName = "CharmAccessory")
+};
+USTRUCT(BlueprintType)
+struct FAccessoryItemData : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) FName ItemRowName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) EAccessoryType AccessoryType;
+};
+
+// ========================================================================================================
+// ------ Misc Item Data ----------------------------------------------------------------------------------
+// ========================================================================================================
+
+USTRUCT(BlueprintType)
+struct FMiscItemData : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) FName ItemRowName;
+};
+
+// ========================================================================================================
+// ------ Quest Item Data ---------------------------------------------------------------------------------
+// ========================================================================================================
+
+USTRUCT(BlueprintType)
+struct FQuestItemData : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) FName ItemRowName;
+};
+
 UCLASS()
 class UItemData : public UPrimaryDataAsset
 {

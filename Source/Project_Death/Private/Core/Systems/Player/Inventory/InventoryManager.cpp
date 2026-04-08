@@ -133,6 +133,12 @@ FWeaponDataInfo* UInventoryManager::GetWeaponData(FName ItemRowName) //grabbing 
 	return WeaponDataTable->FindRow<FWeaponDataInfo>(ItemRowName, TEXT(""));
 }
 
+FArmourDataInfo* UInventoryManager::GetArmourData(FName ItemRowName)
+{
+	if (!ArmourDataTable) return nullptr;
+	return  ArmourDataTable->FindRow<FArmourDataInfo>(ItemRowName, TEXT(""));
+}
+
 // ========================================================================================================
 // ------ Private helpers ---------------------------------------------------------------------------------
 // ========================================================================================================

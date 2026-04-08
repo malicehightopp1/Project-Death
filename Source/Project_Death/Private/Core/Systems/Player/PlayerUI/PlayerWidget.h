@@ -23,6 +23,4 @@ protected:
 	
 	//Player cursor
 	UPROPERTY(EditAnywhere, meta = (BindWidget)) class UImage* PlayerCursorImage;
-	
-	
 };
