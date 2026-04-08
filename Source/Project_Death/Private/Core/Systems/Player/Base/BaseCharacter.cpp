@@ -62,11 +62,11 @@ void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (PlayerWidget)
+	if (PlayerWidget) //settng player widget Will make a change to a UserWidget C++ class
 	{
 		PlayerWidget->AddToViewport();
 	}
-	InventoryManagerRef = FindComponentByClass<UInventoryManager>();
+	InventoryManagerRef = FindComponentByClass<UInventoryManager>(); //grabbing the inventory manager off the player
 }
 
 // Called every frame
@@ -91,14 +91,14 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	}
 }
 
-void ABaseCharacter::Interact(const FInputActionValue& Value)
+void ABaseCharacter::Interact(const FInputActionValue& Value) //setting the definition for interaction *TODO Add a ui that pops up over items the player walks up to*
 {
 	FHitResult* Hit = new FHitResult();
 	FVector start = PlayerCameraComponent->GetComponentLocation();
 	FVector end = start + (PlayerCameraComponent->GetForwardVector() *1000);
 
 	UE_LOG(LogTemp, Display, TEXT("Interact called"));
-	UKismetSystemLibrary::SphereTraceSingle(this, start, end, 5.0f, UEngineTypes::ConvertToTraceType(ECC_Visibility), 
+	UKismetSystemLibrary::SphereTraceSingle(this, start, end, 5.0f, UEngineTypes::ConvertToTraceType(ECC_Visibility), //Persistent for testing purposes
 		false, TArray<AActor*>(), EDrawDebugTrace::Persistent, *Hit, true);
 	
 	if (Hit->GetActor() != nullptr)
@@ -117,7 +117,7 @@ void ABaseCharacter::InventoryToggle(const FInputActionValue& Value) //toggling 
 		UE_LOG(LogTemp, Warning, TEXT("No Inventory Ref"))
 		return;
 	}
-	InventoryManagerRef->Inventory();
+	InventoryManagerRef->Inventory(); //turning inventory on from inventory manager
 }
 
 void ABaseCharacter::PlayerDodge() //dodge for player
@@ -142,7 +142,7 @@ void ABaseCharacter::PlayerDodge() //dodge for player
 	SetActorRotation(DodgeDirection.ToOrientationRotator());
 }
 
-void ABaseCharacter::PlayerDodgeEnd() //reseting the dodge
+void ABaseCharacter::PlayerDodgeEnd() //resetting the dodge *use this for anim notify*
 {
 	bIsDodging = false;
 	DodgeDirection = FVector::ZeroVector;
