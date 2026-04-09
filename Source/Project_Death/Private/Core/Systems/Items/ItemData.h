@@ -143,9 +143,9 @@ UENUM(BlueprintType)
 enum class EAccessoryType : uint8
 {
 	BeltAccessory UMETA(DisplayName = "Belt Accessory"),
-	HandAccessory UMETA(DisplayName = "HandAccessory"),
-	HeadAccessory UMETA(DisplayName = "HeadAccessory"),
-	CharmAccessory UMETA(DisplayName = "CharmAccessory")
+	HandAccessory UMETA(DisplayName = "Hand Accessory"),
+	HeadAccessory UMETA(DisplayName = "Head Accessory"),
+	CharmAccessory UMETA(DisplayName = "Charm Accessory")
 };
 USTRUCT(BlueprintType)
 struct FAccessoryItemData : public FTableRowBase
