@@ -18,9 +18,18 @@ class UPlayerWidget : public UUserWidget
 protected:
 	//Base for UI *HOLDERS*
 	UPROPERTY(EditAnywhere, meta = (BindWidget)) class UCanvasPanel* CanvasPanel;
-	UPROPERTY(EditAnywhere, meta = (BindWidget)) class UOverlay* BaseHolderOverlay;
-	UPROPERTY(EditAnywhere, meta = (BindWidget)) class UOverlay* PlayerCursorOverlay;
 	
 	//Player cursor
 	UPROPERTY(EditAnywhere, meta = (BindWidget)) class UImage* PlayerCursorImage;
+	
+	//PlayerLevel 
+	UPROPERTY(EditAnywhere, meta = (BindWidget)) class UTextBlock* PlayerCurrentLevel;
+	UPROPERTY(EditAnywhere, meta = (BindWidget)) class UTextBlock* PlayerXp;
+	UPROPERTY(EditAnywhere, meta = (BindWidgetOptional)) class UProgressBar* PlayerXpBar;
+	UPROPERTY(EditAnywhere, meta = (BindWidget)) class UTextBlock* PlayerStatPoints;
+	
+	UFUNCTION(BlueprintCallable, Category = "Stats | Level") void OnLevelChanged(int32 NewCharacterLevel);
+	UFUNCTION(BlueprintCallable, Category = "Stats | Level") void OnXpChanged(float NewXp, float MaxXp);
+	UFUNCTION(BlueprintCallable, Category = "Stats | Level") void OnStatPointsChanged(int32 NewStatPoints);
+	
 };

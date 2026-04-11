@@ -10,6 +10,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Core/Systems/Interactions/InteractionManager.h"
 #include "Core/Systems/Player/Inventory/InventoryManager.h"
+#include "Core/Systems/Player/PlayerUI/PlayerWidget.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 
@@ -52,9 +53,6 @@ ABaseCharacter::ABaseCharacter()
 	PlayerCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("PlayerCameraComponent"));
 	PlayerCameraComponent->SetupAttachment(PlayerBloomComponent);
 	PlayerCameraComponent->bUsePawnControlRotation = false; //the bloom handles this
-
-	//Creating widget
-	PlayerWidget = CreateDefaultSubobject<UUserWidget>(TEXT("PlayerWidget"));
 }
 
 // Called when the game starts or when spawned
@@ -64,6 +62,7 @@ void ABaseCharacter::BeginPlay()
 
 	if (PlayerWidget) //settng player widget Will make a change to a UserWidget C++ class
 	{
+		PlayerWidget = CreateWidget<UPlayerWidget>(GetWorld(), PlayerWidgetClass);
 		PlayerWidget->AddToViewport();
 	}
 	InventoryManagerRef = FindComponentByClass<UInventoryManager>(); //grabbing the inventory manager off the player
