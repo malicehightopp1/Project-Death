@@ -7,6 +7,7 @@
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
 #include "Components/VerticalBoxSlot.h"
+#include "Core/Systems/Player/Base/PlayerCurrency/CurrencyManager.h"
 #include "Core/Systems/Player/Base/PlayerStats/CharacterStatsComp.h"
 
 UPlayerWidget::UPlayerWidget(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer) //Constructor 
@@ -37,14 +38,28 @@ void UPlayerWidget::NativeConstruct() //Begin play
 
 		UCharacterStatsComp* StatsComp = Pawn->FindComponentByClass<UCharacterStatsComp>();
 		if (!StatsComp) return;
-
+		
+		UCurrencyManager* CurrencyManager = Pawn->FindComponentByClass<UCurrencyManager>();
+		if (!CurrencyManager) return;
+		
+		CurrencyManager->OnCurrencyChanged.AddDynamic(this, &UPlayerWidget::OnCurrencyChange);
+		
 		StatsComp->OnLevelChange.AddDynamic(this, &UPlayerWidget::OnLevelChanged);
 		StatsComp->OnXpChanged.AddDynamic(this, &UPlayerWidget::OnXpChanged);
 		StatsComp->OnStatPointsChanged.AddDynamic(this, &UPlayerWidget::OnStatPointsChanged);
+		StatsComp->OnHealthChanged.AddDynamic(this, &UPlayerWidget::OnHealthChanged);
+		StatsComp->OnStaminaChanged.AddDynamic(this, &UPlayerWidget::OnStaminaChanged);
+		StatsComp->OnFPChanged.AddDynamic(this, &UPlayerWidget::OnManaChange);
 		
 		OnLevelChanged(StatsComp->CharacterLevel);
 		OnXpChanged(StatsComp->CurrentXp, StatsComp->MaxXp);
 		OnStatPointsChanged(StatsComp->UnspentStatPoints);
+		OnHealthChanged(StatsComp->CurrentHealth, StatsComp->MaxHealth);
+		OnStaminaChanged(StatsComp->CurrentStamina, StatsComp->MaxStamina);
+		OnManaChange(StatsComp->CurrentMana, StatsComp->MaxMana);
+		
+		OnCurrencyChange(CurrencyManager->CurrentCurrency);
+		
 	}, 0.1f, false);
 }
 void UPlayerWidget::OnLevelChanged(int32 NewCharacterLevel)
@@ -78,4 +93,29 @@ void UPlayerWidget::OnStatPointsChanged(int32 NewStatPoints)
 		FText::AsNumber(NewStatPoints));
 	
 	PlayerStatPoints->SetText(FormattedStatPoints);
+}
+
+void UPlayerWidget::OnHealthChanged(float NewHealth, float MaxHealth)
+{
+	HealthBar->SetPercent(NewHealth / MaxHealth);
+}
+
+void UPlayerWidget::OnStaminaChanged(float NewStamina, float MaxStamina)
+{
+	StaminaBar->SetPercent(NewStamina / MaxStamina);
+}
+
+void UPlayerWidget::OnManaChange(float NewMana, float MaxMana)
+{
+	ManaBar->SetPercent(NewMana / MaxMana);
+}
+
+void UPlayerWidget::OnCurrencyChange(int32 NewCurrency)
+{
+	if (!CurrencyText) return;
+	
+	FText FormattedCurrency = FText::Format(NSLOCTEXT("Level", "LevelKey", "{0} $"), 
+		FText::AsNumber(NewCurrency));
+	
+	CurrencyText->SetText(FormattedCurrency);
 }

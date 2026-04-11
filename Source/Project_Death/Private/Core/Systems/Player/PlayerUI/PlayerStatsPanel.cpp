@@ -1,18 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
-#include "Core/Systems/Player/Base/PlayerStats/CharacterStatsComp.h"
 #include "Core/Systems/Player/PlayerUI/PlayerStatsPanel.h"
-
+#include "Core/Systems/Player/Base/PlayerStats/CharacterStatsComp.h"
 #include "Components/ProgressBar.h"
-#include "Components/TextBlock.h"
-
-
+#include "Components/TextBlock.h"	
 UPlayerStatsPanel::UPlayerStatsPanel(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
 	
 }
-
 void UPlayerStatsPanel::NativeConstruct() //Begin play
 {
 	Super::NativeConstruct();
@@ -69,4 +64,3 @@ void UPlayerStatsPanel::OnStatPointsChanged(int32 NewStatPoints)
 	
 	PlayerStatPoints->SetText(FormattedStatPoints);
 }
-

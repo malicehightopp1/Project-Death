@@ -13,6 +13,7 @@
 #include "Core/Systems/Player/PlayerUI/PlayerWidget.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "PlayerStats/CharacterStatsComp.h"
 
 // Sets default values
 ABaseCharacter::ABaseCharacter()
@@ -66,13 +67,18 @@ void ABaseCharacter::BeginPlay()
 		PlayerWidget->AddToViewport();
 	}
 	InventoryManagerRef = FindComponentByClass<UInventoryManager>(); //grabbing the inventory manager off the player
+	CharacterStats = FindComponentByClass<UCharacterStatsComp>();
+	CharacterStats->OnSprintChanged.AddDynamic(this, &ABaseCharacter::OnSprintChanged);
 }
 
 // Called every frame
 void ABaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	if (CharacterStats)
+	{
+		GetCharacterMovement()->MaxWalkSpeed = CharacterStats->bIsSprinting ? SprintSpeed : WalkSpeed;
+	}
 }
 
 // Called to bind functionality to input
@@ -145,4 +151,9 @@ void ABaseCharacter::PlayerDodgeEnd() //resetting the dodge *use this for anim n
 {
 	bIsDodging = false;
 	DodgeDirection = FVector::ZeroVector;
+}
+
+void ABaseCharacter::OnSprintChanged(bool bSprinting)
+{
+	GetCharacterMovement()->MaxWalkSpeed = bSprinting ? SprintSpeed : WalkSpeed;
 }

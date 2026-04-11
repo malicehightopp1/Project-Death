@@ -32,4 +32,21 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Stats | Level") void OnXpChanged(float NewXp, float MaxXp);
 	UFUNCTION(BlueprintCallable, Category = "Stats | Level") void OnStatPointsChanged(int32 NewStatPoints);
 	
+	//PlayerHealth
+	UPROPERTY(EditAnywhere, meta = (BindWidget)) class UProgressBar* HealthBar;
+	UFUNCTION(BlueprintCallable, Category = "Stats | Health") void OnHealthChanged(float NewHealth, float MaxHealth);
+	
+	//PlayerStamina 
+	UPROPERTY(EditAnywhere, meta = (BindWidget)) class UProgressBar* StaminaBar;
+	UFUNCTION(BlueprintCallable, Category = "Stats | Health") void OnStaminaChanged(float NewStamina, float MaxStamina);
+	
+	//Player Mana 
+	UPROPERTY(EditAnywhere, meta = (BindWidget)) class UProgressBar* ManaBar;
+	UFUNCTION(BlueprintCallable, Category = "Stats | Health") void OnManaChange(float NewMana, float MaxMana);
+	
+	//Currency 
+	UPROPERTY(EditAnywhere, meta = (BindWidget)) class UTextBlock* CurrencyText;
+	UFUNCTION(BlueprintCallable, Category = "Stats | Currency") void OnCurrencyChange(int32 NewCurrency);
+
+
 };

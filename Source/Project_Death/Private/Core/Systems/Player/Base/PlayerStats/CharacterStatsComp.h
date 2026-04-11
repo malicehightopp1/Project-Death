@@ -6,52 +6,6 @@
 #include "Components/ActorComponent.h"
 #include "CharacterStatsComp.generated.h"
 
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// Enums-----------------------------------------------------------------------------------------------------------
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-UENUM(BlueprintType)
-enum class EPlayerAttributes : uint8
-{
-	Vigor        UMETA(DisplayName = "Vigor"),
-	Endurance    UMETA(DisplayName = "Endurance"),
-	Strength     UMETA(DisplayName = "Strength"),
-	Dexterity    UMETA(DisplayName = "Dexterity"),
-	MAX          UMETA(Hidden)
-};
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-/// Structs---------------------------------------------------------------------------------------------------------
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-USTRUCT(BlueprintType)
-struct FAttributeData
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Attribute",
-		meta = (ClampMin = 1, ClampMax = 99))
-	int32 Level = 10;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Attribute")
-	int32 HardCap = 99;
-};
-
-USTRUCT(BlueprintType)
-struct FResourcePool
-{
-	GENERATED_BODY()
-
-	UPROPERTY(BlueprintReadOnly, Category = "Resource") float Current = 100.f;
-	UPROPERTY(BlueprintReadOnly, Category = "Resource") float Maximum = 100.f;
-	UPROPERTY(EditDefaultsOnly,  BlueprintReadOnly, Category = "Resource") float RegenPerSecond  = 0.f;
-	UPROPERTY(EditDefaultsOnly,  BlueprintReadOnly, Category = "Resource") float RegenDelay      = 0.f;
-
-	float GetPercent() const { return (Maximum > 0.f) ? (Current / Maximum) : 0.f; }
-	bool  IsEmpty()    const { return Current <= 0.f; }
-	bool  IsFull()     const { return Current >= Maximum; }
-};
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /// delegates-------------------------------------------------------------------------------------------------------
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -63,8 +17,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnDeath);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam (FOnCharacterLevelUp, int32, NewCharLevel);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam (FOnStatPointsChanged, int32, RemainingPoints);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnXpChanged, float, NewXP, float, MaxXP);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnAttributeChanged, EPlayerAttributes, Attr, int32, NewLevel);
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSprintChanged, bool, bSprinting);
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent), Blueprintable)
 class UCharacterStatsComp : public UActorComponent
 {
@@ -86,25 +39,85 @@ public:
 	/// XP -------------------------------------------------------------------------------------------------------------
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	//Function
-	UFUNCTION(BlueprintCallable, Category = "Character Stats | CharacterXp") void OnXpChange(float mXpAddAmount);
+	//XP functions
+	UFUNCTION(BlueprintCallable, Category = "Character Stats | Level") void OnXpChange(float mXpAddAmount);
 	
-	//Variables
+	//Xp Variables
 	UPROPERTY(BlueprintReadOnly, Category = "Characeter Stats | Level") int32 CharacterLevel = 1;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Characeter Stats | Level") int32 UnspentStatPoints = 0; 
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Stats|Level",meta = (ClampMin = 1, ClampMax = 10)) int32 StatPointsPerLevel = 1; //stat points the player gets per level up
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Character Stats | Level",meta = (ClampMin = 1, ClampMax = 10)) int32 StatPointsPerLevel = 1; //stat points the player gets per level up
 
-	UPROPERTY(BlueprintReadOnly, Category = "Stats|Level") int64 CurrentXp= 0;
-	UPROPERTY(BlueprintReadOnly, Category = "Stats|Level") int64 MaxXp = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "Character Stats | Level") int64 CurrentXp= 0;
+	UPROPERTY(BlueprintReadOnly, Category = "Character Stats | Level") int64 MaxXp = 0;
 	
-	//delegates
+	//XP Delegates
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Stats | Level") FOnCharacterLevelUp OnLevelChange; 
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Stats | Level") FOnStatPointsChanged OnStatPointsChanged;
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Stats | Level") FOnXpChanged OnXpChanged;
+	
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/// Health----------------------------------------------------------------------------------------------------------
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	//Health Functions
+	UFUNCTION(BlueprintCallable, Category = "Character Stats | CharacterHealth") void OnHealthChange(float mHealthAddAmount);
+	UFUNCTION(BlueprintCallable, Category = "Character Stats | CharacterHealth") void PlayerDeath();
+	
+	//Health Variables
+	UPROPERTY(BlueprintReadOnly, Category = "Character Stats | CharacterHealth") float CurrentHealth = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "Character Stats | CharacterHealth") float MaxHealth = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "Character Stats | CharacterHealth") bool bIsPlayerDead = false;
+	
+	//Health Delegates 
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Character Stats | CharacterHealth") FOnHealthChanged OnHealthChanged;
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Character Stats | CharacterHealth") FOnDeath OnDeath;
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/// Stamina---------------------------------------------------------------------------------------------------------
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	//Stamina Functions
+	UFUNCTION(BlueprintCallable, Category = "Character Stats | CharacterStamina") void OnStaminaChange(float NewStamina);
+	UFUNCTION(BlueprintCallable, Category = "Character Stats | CharacterStamina") void OnStaminaRegen(float DeltaTime);
+	UFUNCTION(BlueprintCallable) void StartSprinting();
+	UFUNCTION(BlueprintCallable) void StopSprinting();
+	
+	//Stamina Variables
+	UPROPERTY(BlueprintReadOnly, Category = "Character Stats | CharacterStamina") float CurrentStamina = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "Character Stats | CharacterStamina") float MaxStamina = 0;
+	UPROPERTY(EditDefaultsOnly, Category = "Character Stats | CharacterStamina") float StaminaRegen = 0;
+	UPROPERTY(EditDefaultsOnly, Category = "Character Stats | CharacterStamina") float RegenDelay = 1.2f;
+	UPROPERTY(EditDefaultsOnly, Category = "Character Stats | CharacterStamina") float RegenDelayTimer = 0.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "Character Stats | CharacterStamina") bool bIsRegening = false;
+	UPROPERTY(EditDefaultsOnly, Category = "Stats|Stamina") float StaminaDrain = 15.f;
+	UPROPERTY(BlueprintReadOnly, Category = "Character Stats | CharacterStamina") bool bIsSprinting = false;
+	
+	//Delegates
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Character Stats | CharacterStamina") FOnStaminaChanged OnStaminaChanged; 
+	UPROPERTY(BlueprintAssignable) FOnSprintChanged OnSprintChanged;
+
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/// Mana------------------------------------------------------------------------------------------------------------
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	//Mana Functions
+	UFUNCTION(BlueprintCallable, Category = "Character Stats | CharacterMana") void OnManaChange(float NewMana);
+	UFUNCTION(BlueprintCallable, Category = "Character Stats | CharacterMana") void OnManaRegen(float DeltaTime);
+	
+	//Mana variables
+	UPROPERTY(BlueprintReadOnly, Category = "Character Stats | CharacterMana") float CurrentMana = 0;
+	UPROPERTY(BlueprintReadOnly, Category = "Character Stats | CharacterMana") float MaxMana = 0;
+	UPROPERTY(EditDefaultsOnly, Category = "Character Stats | CharacterMana") float ManaRegen = 0;
+	UPROPERTY(EditDefaultsOnly, Category = "Character Stats | CharacterMana") float ManaDelay = 1.2f;
+	UPROPERTY(EditDefaultsOnly, Category = "Character Stats | CharacterMana") float ManaRegenTimer = 0.0f;
+	UPROPERTY(BlueprintReadOnly, Category = "Character Stats | CharacterMana") bool bIsManaRegening = false;
+	
+	//Mana Delegates
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Character Stats | CharacterMana") FOnFPChanged OnFPChanged; 
 private:
 	UFUNCTION() void PlayerLevelUp();
-	UFUNCTION()
-	static int64 CalculateXpCostForNextLevel(int32 Level);
+	UFUNCTION() static int64 CalculateXpCostForNextLevel(int32 Level);
 };
