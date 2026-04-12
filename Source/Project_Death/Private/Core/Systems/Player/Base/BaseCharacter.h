@@ -7,6 +7,8 @@
 #include "GameFramework/Character.h"
 #include "BaseCharacter.generated.h"
 
+class UCharacterStatsComp;
+class UPlayerWidget;
 struct FInputActionValue;
 class UInventoryManager;
 class UInputAction;
@@ -36,7 +38,8 @@ public:
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// Ui ------------------------------------------------------------------------------------------------------------
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	UPROPERTY(EditDefaultsOnly, Category = "Player | UI") UUserWidget* PlayerWidget;
+	UPROPERTY() UUserWidget* PlayerWidget;
+	UPROPERTY(EditDefaultsOnly, Category = "Player | UI") TSubclassOf<UPlayerWidget> PlayerWidgetClass;
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// Dodge ----------------------------------------------------------------------------------------------------------
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -66,6 +69,13 @@ private:
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	UFUNCTION(BlueprintCallable, Category = "Movement") void PlayerDodge();
 	UFUNCTION(BlueprintCallable, Category = "Movement") void PlayerDodgeEnd();
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Movement") float SprintSpeed = 600.f;
+	UPROPERTY(EditDefaultsOnly, Category = "Movement") float WalkSpeed   = 300.f;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Sprint") UCharacterStatsComp* CharacterStats; 
+	
+	UFUNCTION(BlueprintCallable, Category = "Movement") void OnSprintChanged (bool bSprinting);
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// Components -----------------------------------------------------------------------------------------------------

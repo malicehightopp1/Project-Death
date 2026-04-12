@@ -10,8 +10,10 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Core/Systems/Interactions/InteractionManager.h"
 #include "Core/Systems/Player/Inventory/InventoryManager.h"
+#include "Core/Systems/Player/PlayerUI/PlayerWidget.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "PlayerStats/CharacterStatsComp.h"
 
 // Sets default values
 ABaseCharacter::ABaseCharacter()
@@ -52,9 +54,6 @@ ABaseCharacter::ABaseCharacter()
 	PlayerCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("PlayerCameraComponent"));
 	PlayerCameraComponent->SetupAttachment(PlayerBloomComponent);
 	PlayerCameraComponent->bUsePawnControlRotation = false; //the bloom handles this
-
-	//Creating widget
-	PlayerWidget = CreateDefaultSubobject<UUserWidget>(TEXT("PlayerWidget"));
 }
 
 // Called when the game starts or when spawned
@@ -64,16 +63,22 @@ void ABaseCharacter::BeginPlay()
 
 	if (PlayerWidget) //settng player widget Will make a change to a UserWidget C++ class
 	{
+		PlayerWidget = CreateWidget<UPlayerWidget>(GetWorld(), PlayerWidgetClass);
 		PlayerWidget->AddToViewport();
 	}
 	InventoryManagerRef = FindComponentByClass<UInventoryManager>(); //grabbing the inventory manager off the player
+	CharacterStats = FindComponentByClass<UCharacterStatsComp>();
+	CharacterStats->OnSprintChanged.AddDynamic(this, &ABaseCharacter::OnSprintChanged);
 }
 
 // Called every frame
 void ABaseCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	if (CharacterStats)
+	{
+		GetCharacterMovement()->MaxWalkSpeed = CharacterStats->bIsSprinting ? SprintSpeed : WalkSpeed;
+	}
 }
 
 // Called to bind functionality to input
@@ -146,4 +151,9 @@ void ABaseCharacter::PlayerDodgeEnd() //resetting the dodge *use this for anim n
 {
 	bIsDodging = false;
 	DodgeDirection = FVector::ZeroVector;
+}
+
+void ABaseCharacter::OnSprintChanged(bool bSprinting)
+{
+	GetCharacterMovement()->MaxWalkSpeed = bSprinting ? SprintSpeed : WalkSpeed;
 }
