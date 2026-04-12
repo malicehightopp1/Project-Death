@@ -60,71 +60,6 @@ void UCharacterStatsComp::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	OnStaminaRegen(DeltaTime); //Regening stamina
 	OnManaRegen(DeltaTime);
 }
-#pragma region Attributes
-bool UCharacterStatsComp::SpendStatPoint(FName AttributeName)
-{
-	// Guard: nothing to spend
-	if (UnspentStatPoints <= 0) return false;
-
-	bool bSpent = false;
-
-	// Check which attribute was requested and increment it if under cap
-	if (AttributeName == "Vitality"  && Attributes.Vitality  < 99) { Attributes.Vitality++;  bSpent = true; }
-	else if (AttributeName == "Endurance" && Attributes.Endurance < 99) { Attributes.Endurance++; bSpent = true; }
-	else if (AttributeName == "Mind"      && Attributes.Mind      < 99) { Attributes.Mind++;      bSpent = true; }
-	else if (AttributeName == "Strength"  && Attributes.Strength  < 99) { Attributes.Strength++;  bSpent = true; }
-	else if (AttributeName == "Dexterity" && Attributes.Dexterity < 99) { Attributes.Dexterity++; bSpent = true; }
-
-	if (!bSpent) return false;
-
-	UnspentStatPoints--;
-	RecalculateDerivedStats();
-
-	OnStatPointsChanged.Broadcast(UnspentStatPoints);
-	OnAttributesChanged.Broadcast(Attributes);
-	return true;
-}
-
-void UCharacterStatsComp::RecalculateDerivedStats()
-{
-	if (!AttributeStatTable) 
-	{
-		UE_LOG(LogTemp, Error, TEXT("CharacterStatsComp: No AttributeStatTable assigned!"));
-		return;
-	}
-
-	if (const FAttributeStatRow* Row = GetStatRow(Attributes.Vitality))
-	{
-		float OldRatio = (MaxHealth > 0.f) ? CurrentHealth / MaxHealth : 1.f;
-		MaxHealth = Row->VitalityHP;
-		CurrentHealth = FMath::Clamp(OldRatio * MaxHealth, 0.f, MaxHealth); // preserve % 
-		OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);
-	}
-
-	if (const FAttributeStatRow* Row = GetStatRow(Attributes.Endurance))
-	{
-		float OldRatio = (MaxStamina > 0.f) ? CurrentStamina / MaxStamina : 1.f;
-		MaxStamina = Row->EnduranceStamina;
-		CurrentStamina = FMath::Clamp(OldRatio * MaxStamina, 0.f, MaxStamina);
-		OnStaminaChanged.Broadcast(CurrentStamina, MaxStamina);
-	}
-
-	if (const FAttributeStatRow* Row = GetStatRow(Attributes.Mind))
-	{
-		float OldRatio = (MaxMana > 0.f) ? CurrentMana / MaxMana : 1.f;
-		MaxMana = Row->MindMana;
-		CurrentMana = FMath::Clamp(OldRatio * MaxMana, 0.f, MaxMana);
-		OnFPChanged.Broadcast(CurrentMana, MaxMana);
-	}
-}
-const FAttributeStatRow* UCharacterStatsComp::GetStatRow(int32 Level) const
-{
-	if (!AttributeStatTable) return nullptr;
-
-	FName RowName = FName(*FString::FromInt(Level));
-	return AttributeStatTable->FindRow<FAttributeStatRow>(RowName, TEXT("GetStatRow"));
-}
-#pragma endregion Attributes
 #pragma region XpAndLeveling 
 void UCharacterStatsComp::OnXpChange(float mXpAddAmount)
 {
@@ -155,7 +90,6 @@ int64 UCharacterStatsComp::CalculateXpCostForNextLevel(int32 Level)
 	const double Cost = 100 + (L * L * 50); // Simple curve: 150, 300, 550, 900...
 	return static_cast<int64>(Cost);
 }
-
 #pragma endregion XpAndLeveling
 #pragma region PlayerHealth
 void UCharacterStatsComp::OnHealthChange(float mHealthAddAmount)

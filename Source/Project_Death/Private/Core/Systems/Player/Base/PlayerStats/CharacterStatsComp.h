@@ -7,6 +7,7 @@
 #include "CharacterStatsComp.generated.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+<<<<<<< HEAD
 /// Structs --------------------------------------------------------------------------------------------------------
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -35,6 +36,8 @@ struct FCharacterAttributes
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta=(ClampMin=1, ClampMax=99)) int32 Dexterity = 1;
 };
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+=======
+>>>>>>> c9f04b3eba558f370552b9848ef4960e006fdd99
 /// delegates-------------------------------------------------------------------------------------------------------
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -46,8 +49,11 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam (FOnCharacterLevelUp, int32, NewChar
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam (FOnStatPointsChanged, int32, RemainingPoints);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnXpChanged, float, NewXP, float, MaxXP);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSprintChanged, bool, bSprinting);
+<<<<<<< HEAD
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAttributesChanged, FCharacterAttributes, NewAttributes);
 
+=======
+>>>>>>> c9f04b3eba558f370552b9848ef4960e006fdd99
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent), Blueprintable)
 class UCharacterStatsComp : public UActorComponent
 {
@@ -66,6 +72,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+<<<<<<< HEAD
 	/// Attributes  ----------------------------------------------------------------------------------------------------
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
@@ -80,6 +87,8 @@ public:
 	UPROPERTY(BlueprintAssignable, Category = "Character Stats | Attributes") FOnAttributesChanged OnAttributesChanged;
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+=======
+>>>>>>> c9f04b3eba558f370552b9848ef4960e006fdd99
 	/// XP -------------------------------------------------------------------------------------------------------------
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	
@@ -164,5 +173,8 @@ public:
 private:
 	UFUNCTION() void PlayerLevelUp();
 	UFUNCTION() static int64 CalculateXpCostForNextLevel(int32 Level);
-	const FAttributeStatRow* GetStatRow(int32 Level) const;
+<<<<<<<
+	const FAttributeStatRow FAttributeStatRow* GetStatRow(int32 Level) const;
+=======
+>>>>>>> c9f04b3eba558f370552b9848ef4960e006fdd99
 };
