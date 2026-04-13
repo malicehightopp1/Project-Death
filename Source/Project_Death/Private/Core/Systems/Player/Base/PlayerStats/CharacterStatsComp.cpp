@@ -83,12 +83,13 @@ void UCharacterStatsComp::RecalculateDerivedStats()
 {
 	if (!AttributeStatTable) return;
 
-	auto Lookup = [&](int32 Level) -> const FAttributeStatRow*
+	auto Lookup = [&](int32 Level) -> const FAttributeStatRow* 
 	{
-		return AttributeStatTable->FindRow<FAttributeStatRow>(
+		return AttributeStatTable->FindRow<FAttributeStatRow>( //looking up data based on row name
 			FName(*FString::FromInt(Level)), TEXT("RecalculateDerivedStats"));
 	};
 
+	//Setting new data for upgrading attributes
 	if (const FAttributeStatRow* Row = Lookup(Attributes.Vitality))
 	{
 		MaxHealth = Row->VitalityHP;
@@ -135,10 +136,14 @@ void UCharacterStatsComp::PlayerLevelUp()
 }
 int64 UCharacterStatsComp::CalculateXpCostForNextLevel(int32 Level)
 {
+	//Might switch to 100 + (Level^2 * 100) Feels more appropriate *MORE XP*
 	if (Level <= 0) return 100;
-	const double L = static_cast<double>(Level);
-	const double Cost = 100 + (L * L * 50); // Simple curve: 150, 300, 550, 900...
-	return static_cast<int64>(Cost);
+	const double L = static_cast<double>(Level); //this used floating point arithmetic (avoiding integer rounding issues)
+	const double Cost = 100 + (L * L * 50); // 100 + (Level^2 X 50) Quadratic curve - 100 base cost L * L * 50 is the scaling 
+	//Example: Level 1: 100 + (1 * 50) = 150,
+	//Level 5: 100 + (25 * 50) = 1350,
+	//Level 10: 100 + (100 * 50) = 5100
+	return static_cast<int64>(Cost); //returns an integer value  
 }
 #pragma endregion XpAndLeveling
 #pragma region PlayerHealth

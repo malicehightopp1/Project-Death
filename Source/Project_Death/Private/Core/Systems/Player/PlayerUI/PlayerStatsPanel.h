@@ -43,11 +43,9 @@ protected:
     // Internal State
     // -------------------------------------------------------------------------
 
-    UPROPERTY()
-    TObjectPtr<UCharacterStatsComp> StatsComp;
+    UPROPERTY() TObjectPtr<UCharacterStatsComp> StatsComp;
 
-    UPROPERTY()
-    TArray<TObjectPtr<UButton>> SpendButtons;
+    UPROPERTY() TArray<TObjectPtr<UButton>> SpendButtons; //used for creating the buttons that use the statcomp to upgrade the attrubutes
 
     // -------------------------------------------------------------------------
     // Pawn / Component Binding

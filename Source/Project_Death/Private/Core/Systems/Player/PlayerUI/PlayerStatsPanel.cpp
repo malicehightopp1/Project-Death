@@ -42,7 +42,7 @@ void UPlayerStatsPanel::OnPawnChanged(APawn* OldPawn, APawn* NewPawn)
     if (NewPawn) BindToStatsComp(NewPawn);
 }
 
-void UPlayerStatsPanel::BindToStatsComp(APawn* Pawn)
+void UPlayerStatsPanel::BindToStatsComp(APawn* Pawn) //binding all delegates
 {
     StatsComp = Pawn->FindComponentByClass<UCharacterStatsComp>();
     if (!StatsComp) return;
@@ -52,7 +52,7 @@ void UPlayerStatsPanel::BindToStatsComp(APawn* Pawn)
     StatsComp->OnStatPointsChanged.AddDynamic(this, &UPlayerStatsPanel::OnStatPointsChanged);
     StatsComp->OnAttributesChanged.AddDynamic(this, &UPlayerStatsPanel::OnAttributesChanged);
 
-    BuildAttributeRows();
+    BuildAttributeRows(); //creating Ui 
 
     // Force initial refresh
     OnLevelChanged(StatsComp->CharacterLevel);
@@ -60,7 +60,7 @@ void UPlayerStatsPanel::BindToStatsComp(APawn* Pawn)
     OnStatPointsChanged(StatsComp->UnspentStatPoints);
 }
 
-void UPlayerStatsPanel::UnbindFromStatsComp()
+void UPlayerStatsPanel::UnbindFromStatsComp() //unbinding delegates
 {
     if (!StatsComp) return;
     StatsComp->OnLevelChange.RemoveDynamic(this, &UPlayerStatsPanel::OnLevelChanged);
@@ -70,7 +70,7 @@ void UPlayerStatsPanel::UnbindFromStatsComp()
     StatsComp = nullptr;
 }
 
-void UPlayerStatsPanel::BuildAttributeRows()
+void UPlayerStatsPanel::BuildAttributeRows() //building the stat UI and setting the attribute data
 {
         if (!StatRowContainer) return;
 
@@ -129,11 +129,10 @@ void UPlayerStatsPanel::BuildAttributeRows()
     RefreshAllRows();
 }
 
-void UPlayerStatsPanel::RefreshAllRows()
+void UPlayerStatsPanel::RefreshAllRows() //refreshing UI 
 {
     if (!StatsComp || !StatRowContainer) return;
 
-    // Attribute levels in the same order as BuildAttributeRows
     TArray<int32> Levels =
     {
         StatsComp->Attributes.Vitality,
@@ -153,13 +152,11 @@ void UPlayerStatsPanel::RefreshAllRows()
         UHorizontalBox* Row = Cast<UHorizontalBox>(Rows[i]);
         if (!Row) continue;
 
-        const TArray<UWidget*>& Cells = Row->GetAllChildren();
-        // Cells: [0] NameText, [1] LevelText, [2] ValueText, [3] Button
+        const TArray<UWidget*>& Cells = Row->GetAllChildren(); //Created cells for each stat, the cells being the stats name and level and such
         if (Cells.Num() < 4) continue;
 
         const int32 CurrentLevel = Levels[i];
 
-        // Update level number
         if (UTextBlock* LevelText = Cast<UTextBlock>(Cells[1]))
         {
             LevelText->SetText(FText::AsNumber(CurrentLevel));
@@ -169,7 +166,7 @@ void UPlayerStatsPanel::RefreshAllRows()
         if (UTextBlock* ValueText = Cast<UTextBlock>(Cells[2]))
         {
             FString Preview = TEXT("—");
-            if (UDataTable* Table = StatsComp->AttributeStatTable)
+            if (UDataTable* Table = StatsComp->AttributeStatTable) //actually setting the data based on the attrubutes table
             {
                 const FAttributeStatRow* Cur  = Table->FindRow<FAttributeStatRow>(FName(*FString::FromInt(CurrentLevel)),     TEXT(""));
                 const FAttributeStatRow* Next = Table->FindRow<FAttributeStatRow>(FName(*FString::FromInt(CurrentLevel + 1)), TEXT(""));
@@ -186,7 +183,6 @@ void UPlayerStatsPanel::RefreshAllRows()
             ValueText->SetText(FText::FromString(Preview));
         }
 
-        // Toggle + button
         if (SpendButtons.IsValidIndex(i))
         {
             SpendButtons[i]->SetIsEnabled(bCanSpendAny && CurrentLevel < 99);
@@ -194,9 +190,10 @@ void UPlayerStatsPanel::RefreshAllRows()
     }
 }
 
-// --- Delegate callbacks ---
-
-void UPlayerStatsPanel::OnAttributesChanged(FCharacterAttributes NewAttributes)
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// delegate Callbacks----------------------------------------------------------------------------------------------
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+void UPlayerStatsPanel::OnAttributesChanged(FCharacterAttributes NewAttributes) //delegate for actually changing UI
 {
     RefreshAllRows();
 }

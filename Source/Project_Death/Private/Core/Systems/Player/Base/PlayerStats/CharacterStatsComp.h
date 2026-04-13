@@ -164,5 +164,4 @@ public:
 private:
 	UFUNCTION() void PlayerLevelUp();
 	UFUNCTION() static int64 CalculateXpCostForNextLevel(int32 Level);
-	const FAttributeStatRow* GetStatRow(int32 Level) const;
 };
