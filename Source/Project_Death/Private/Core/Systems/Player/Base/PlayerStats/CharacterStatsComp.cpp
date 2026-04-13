@@ -60,6 +60,56 @@ void UCharacterStatsComp::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	OnStaminaRegen(DeltaTime); //Regening stamina
 	OnManaRegen(DeltaTime);
 }
+
+bool UCharacterStatsComp::SpendStatPoint(FName AttributeName)
+{
+	if (UnspentStatPoints <= 0) return false;
+
+	if (AttributeName == "Vitality")  Attributes.Vitality++;
+	else if (AttributeName == "Endurance") Attributes.Endurance++;
+	else if (AttributeName == "Mind")      Attributes.Mind++;
+	else if (AttributeName == "Strength")  Attributes.Strength++;
+	else if (AttributeName == "Dexterity") Attributes.Dexterity++;
+	else return false;
+
+	UnspentStatPoints--;
+	RecalculateDerivedStats();
+	OnStatPointsChanged.Broadcast(UnspentStatPoints);
+	OnAttributesChanged.Broadcast(Attributes);
+	return true;
+}
+
+void UCharacterStatsComp::RecalculateDerivedStats()
+{
+	if (!AttributeStatTable) return;
+
+	auto Lookup = [&](int32 Level) -> const FAttributeStatRow*
+	{
+		return AttributeStatTable->FindRow<FAttributeStatRow>(
+			FName(*FString::FromInt(Level)), TEXT("RecalculateDerivedStats"));
+	};
+
+	if (const FAttributeStatRow* Row = Lookup(Attributes.Vitality))
+	{
+		MaxHealth = Row->VitalityHP;
+		CurrentHealth = FMath::Clamp(CurrentHealth, 0.f, MaxHealth);
+		OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);
+	}
+
+	if (const FAttributeStatRow* Row = Lookup(Attributes.Endurance))
+	{
+		MaxStamina = Row->EnduranceStamina;
+		CurrentStamina = FMath::Clamp(CurrentStamina, 0.f, MaxStamina);
+		OnStaminaChanged.Broadcast(CurrentStamina, MaxStamina);
+	}
+
+	if (const FAttributeStatRow* Row = Lookup(Attributes.Mind))
+	{
+		MaxMana = Row->MindMana;
+		CurrentMana = FMath::Clamp(CurrentMana, 0.f, MaxMana);
+		OnFPChanged.Broadcast(CurrentMana, MaxMana);
+	}
+}
 #pragma region XpAndLeveling 
 void UCharacterStatsComp::OnXpChange(float mXpAddAmount)
 {

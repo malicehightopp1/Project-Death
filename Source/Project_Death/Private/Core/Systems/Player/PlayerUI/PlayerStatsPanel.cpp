@@ -4,10 +4,10 @@
 #include "Core/Systems/Player/Base/PlayerStats/CharacterStatsComp.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"	
-#include "Components/VerticalBox.h"
 #include "Components/HorizontalBox.h"
 #include "Components/HorizontalBoxSlot.h"
 #include "Components/Button.h"
+#include "Components/VerticalBox.h"
 
 UPlayerStatsPanel::UPlayerStatsPanel(const FObjectInitializer& ObjectInitializer)
     : Super(ObjectInitializer) {}
@@ -90,6 +90,7 @@ void UPlayerStatsPanel::BuildAttributeRows()
     {
         UHorizontalBox* Row = NewObject<UHorizontalBox>(this);
 
+        // Name label
         UTextBlock* NameText = NewObject<UTextBlock>(this);
         NameText->SetText(FText::FromString(AttributeList[i].Value));
         UHorizontalBoxSlot* NameSlot = Row->AddChildToHorizontalBox(NameText);
