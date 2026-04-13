@@ -9,25 +9,57 @@ UMainMenuUI::UMainMenuUI(const FObjectInitializer& ObjectInitializer) : Super(Ob
 
 void UMainMenuUI::NativeConstruct()
 {
+	Super::NativeConstruct();
+}
+
+void UMainMenuUI::NativeOnInitialized() //this will run right after being added to viewport
+{
+	Super::NativeOnInitialized();
 	BindWidgets();
 }
 
 void UMainMenuUI::BindWidgets()
 {
-	StartButton->OnClicked.AddDynamic(this, &UMainMenuUI::StartGame);
-	SettingsButton->OnClicked.AddDynamic(this, &UMainMenuUI::SettingsMenu);
-	CreditsButton->OnClicked.AddDynamic(this, &UMainMenuUI::CreditsMenu);
-	QuitButton->OnClicked.AddDynamic(this, &UMainMenuUI::QuitGame);
-	BackButton->OnClicked.AddDynamic(this, &UMainMenuUI::Backbutton);
-}
-
-void UMainMenuUI::UnbindWidgets() //removing if necessary
-{
-	StartButton->OnClicked.RemoveDynamic(this, &UMainMenuUI::StartGame);
-	SettingsButton->OnClicked.RemoveDynamic(this, &UMainMenuUI::SettingsMenu);
-	CreditsButton->OnClicked.RemoveDynamic(this, &UMainMenuUI::CreditsMenu);
-	QuitButton->OnClicked.RemoveDynamic(this, &UMainMenuUI::QuitGame);
-	BackButton->OnClicked.RemoveDynamic(this, &UMainMenuUI::Backbutton);
+	if (IsValid(StartButton))
+	{
+		StartButton->OnClicked.AddDynamic(this, &UMainMenuUI::StartGame);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("StartButton is NULL"));
+	}
+	if (IsValid(SettingsButton))
+	{
+		SettingsButton->OnClicked.AddDynamic(this, &UMainMenuUI::SettingsMenu);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("SettingsButton is NULL"));
+	}
+	if (IsValid(CreditsButton))
+	{
+		CreditsButton->OnClicked.AddDynamic(this, &UMainMenuUI::CreditsMenu);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("CreditsButton is NULL"));
+	}
+	if (IsValid(QuitButton))
+	{
+		QuitButton->OnClicked.AddDynamic(this, &UMainMenuUI::QuitGame);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("QuitButton is NULL"));
+	}
+	if (IsValid(BackButton))
+	{
+		BackButton->OnClicked.AddDynamic(this, &UMainMenuUI::Backbutton);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("BackButton is NULL"));
+	}
 }
 
 void UMainMenuUI::StartGame()

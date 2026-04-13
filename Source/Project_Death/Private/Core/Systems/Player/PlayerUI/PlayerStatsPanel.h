@@ -29,7 +29,7 @@ protected:
     // Bound Widget References
     // -------------------------------------------------------------------------
 
-    UPROPERTY(meta = (BindWidget))TObjectPtr<UTextBlock> PlayerCurrentLevel;
+    UPROPERTY(meta = (BindWidget)) TObjectPtr<UTextBlock> PlayerCurrentLevel;
 
     UPROPERTY(meta = (BindWidget)) TObjectPtr<UTextBlock> PlayerXp;
 
