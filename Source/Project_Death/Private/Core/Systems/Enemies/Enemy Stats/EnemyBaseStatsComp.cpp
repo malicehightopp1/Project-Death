@@ -7,6 +7,7 @@
 UEnemyBaseStatsComp::UEnemyBaseStatsComp()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+	
 }
 
 
@@ -34,7 +35,7 @@ void UEnemyBaseStatsComp::EnemyHealthChange(float DamageToTake)
 
 	EnemyCurrentHealth = FMath::Clamp(EnemyCurrentHealth, 0 , EnemyMaxHealth);
 
-	if (EnemyCurrentHealth == 0)
+	if (EnemyCurrentHealth <= 0)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Enemy Died!!"))
 	}

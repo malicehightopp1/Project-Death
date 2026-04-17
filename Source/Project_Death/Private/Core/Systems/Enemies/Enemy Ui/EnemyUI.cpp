@@ -10,8 +10,6 @@ void UEnemyUI::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	
-	
 	FTimerHandle TimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this]()
 	{
@@ -22,18 +20,15 @@ void UEnemyUI::NativeConstruct()
 		UEnemyBaseStatsComp* EnemyStats = Owner->FindComponentByClass<UEnemyBaseStatsComp>();
 		if (!EnemyStats) return;
 
-		//EnemyStats->OnHealthChanged.AddDynamic(this, &UEnemyUI::OnHealthChanged);
+		EnemyStats->OnHealthChanged.AddDynamic(this, &UEnemyUI::OnHealthChanged);
+
+		OnHealthChanged(EnemyStats->EnemyCurrentHealth, EnemyStats->EnemyMaxHealth);
 		
 	}, 0.1f, false);
 }
 
 void UEnemyUI::OnHealthChanged(float NewHealth, float MaxHealth)
 {
-	/*
 	EnemyHealthBar->SetPercent(NewHealth / MaxHealth);
-	
-	FText FormattedHealth = FText::Format(NSLOCTEXT("Level", "LevelKey", "{0} HP / {1} HP"), 
-	FText::AsNumber(NewHealth), FText::AsNumber(MaxHealth));
-	*/
 }
 
