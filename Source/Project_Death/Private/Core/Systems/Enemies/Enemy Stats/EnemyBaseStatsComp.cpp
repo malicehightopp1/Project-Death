@@ -19,6 +19,7 @@ void UEnemyBaseStatsComp::BeginPlay()
 	EnemyCurrentHealth = EnemyMaxHealth;
 
 	OnHealthChanged.Broadcast(EnemyCurrentHealth, EnemyMaxHealth);
+	OnDeathChanged.Broadcast(false);
 }
 
 
@@ -35,10 +36,11 @@ void UEnemyBaseStatsComp::EnemyHealthChange(float DamageToTake)
 
 	EnemyCurrentHealth = FMath::Clamp(EnemyCurrentHealth, 0 , EnemyMaxHealth);
 
+	OnHealthChanged.Broadcast(EnemyCurrentHealth, EnemyMaxHealth);
 	if (EnemyCurrentHealth <= 0)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Enemy Died!!"))
+		OnDeathChanged.Broadcast(true);
 	}
-	OnHealthChanged.Broadcast(EnemyCurrentHealth, EnemyMaxHealth);
 }
 

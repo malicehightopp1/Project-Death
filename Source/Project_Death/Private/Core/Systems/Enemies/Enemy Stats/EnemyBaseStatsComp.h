@@ -8,6 +8,7 @@
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnEnemyHealthChanged, float,  CurrentHealth, float,  MaxHealth);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyDeath, bool, IsDead);
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class UEnemyBaseStatsComp : public UActorComponent
 {
@@ -26,12 +27,12 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UPROPERTY(BlueprintAssignable, BlueprintCallable) FOnEnemyHealthChanged OnHealthChanged;
+	UPROPERTY(BlueprintAssignable, BlueprintCallable) FOnEnemyDeath OnDeathChanged;
+	
 	UPROPERTY(EditAnywhere, Category = "Ai Enemy | Stats") float EnemyCurrentHealth = 0.0f;
 	UPROPERTY(EditAnywhere, Category = "Ai Enemy | Stats") float EnemyMaxHealth = 100.0f;
 private:
 
 	UFUNCTION(BlueprintCallable) void EnemyHealthChange(float DamageToTake);
 	
-
-
 };

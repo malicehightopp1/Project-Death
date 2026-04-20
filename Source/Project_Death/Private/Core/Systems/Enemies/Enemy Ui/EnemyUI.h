@@ -15,8 +15,10 @@ class UEnemyUI : public UUserWidget
 	virtual void NativeConstruct() override; //treated as begin play starts when added to viewport
 
 public:
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget)) class UProgressBar* EnemyHealthBar;
+	UFUNCTION(BlueprintCallable, Category = "EnemyUI") void InitwithOwner(AActor* InownerActor);
 	UFUNCTION(BlueprintCallable, Category = "Stats | Health") void OnHealthChanged(float NewHealth, float MaxHealth);
-
 	
+	UPROPERTY() AActor* OwnerActor = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget)) class UProgressBar* EnemyHealthBar;
+
 };
