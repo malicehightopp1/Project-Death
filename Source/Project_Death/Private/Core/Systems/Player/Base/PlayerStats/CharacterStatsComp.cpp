@@ -85,8 +85,8 @@ void UCharacterStatsComp::RecalculateDerivedStats()
 
 	auto Lookup = [&](int32 Level) -> const FAttributeStatRow* 
 	{
-		return AttributeStatTable->FindRow<FAttributeStatRow>( //looking up data based on row name
-			FName(*FString::FromInt(Level)), TEXT("RecalculateDerivedStats"));
+		//looking up data based on row name 
+		return AttributeStatTable->FindRow<FAttributeStatRow>(FName(*FString::FromInt(Level)), TEXT("RecalculateDerivedStats"));
 	};
 
 	//Setting new data for upgrading attributes
