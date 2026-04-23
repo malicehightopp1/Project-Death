@@ -225,13 +225,14 @@ void UInventoryManager::Inventory() //for turning on and off the UI
 			PC->SetInputMode(InputMode);
 		}
 	}
-	if (PaperDollClass)
+	if (PaperDollClass && bIsInventoryOpen == false)
 	{
 		PaperDollInstance = CreateWidget<UPaperDollWidget>(PC, PaperDollClass);
 		if (PaperDollInstance)
 		{
 			PaperDollInstance->AddToViewport();
 
+			bIsInventoryOpen = true;
 			PaperDollInstance->InitializePaperDoll(
 				GetOwner()->FindComponentByClass<UEquipmentManager>(),
 				this

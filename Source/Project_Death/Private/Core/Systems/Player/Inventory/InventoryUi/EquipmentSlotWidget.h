@@ -39,6 +39,6 @@ protected:
 	UPROPERTY(meta = (BindWidget))class UImage* SlotIcon;
 
 	UPROPERTY(meta = (BindWidget))class UButton* SlotButton;
-
+	
 	virtual void NativeConstruct() override;
 };
