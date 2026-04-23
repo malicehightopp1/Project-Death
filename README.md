@@ -33,7 +33,6 @@
 * **XP & Attribute System:** Scaling difficulty and character customization.
 
 ## 🏗 Architecture Overview
-*(Provide a brief breakdown of your C++ class hierarchy or GameState logic here)*
 
 ## 🎮 Controls
 | Action | Key (KB/M) | Button (Gamepad) |
