@@ -61,6 +61,15 @@ void UCharacterStatsComp::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	OnManaRegen(DeltaTime);
 }
 
+void UCharacterStatsComp::ApplyEquipmentBonuses(float BonusHP, float BonusStam, float BonusMana)
+{
+	EquipmentBonusHealth  = BonusHP;
+	EquipmentBonusStamina = BonusStam;
+	EquipmentBonusMana    = BonusMana;
+
+	RecalculateDerivedStats(); //update stats immediatly
+}
+
 bool UCharacterStatsComp::SpendStatPoint(FName AttributeName)
 {
 	if (UnspentStatPoints <= 0) return false;
@@ -83,30 +92,28 @@ void UCharacterStatsComp::RecalculateDerivedStats()
 {
 	if (!AttributeStatTable) return;
 
-	auto Lookup = [&](int32 Level) -> const FAttributeStatRow* 
+	auto Lookup = [&](int32 Level) -> const FAttributeStatRow*
 	{
-		return AttributeStatTable->FindRow<FAttributeStatRow>( //looking up data based on row name
-			FName(*FString::FromInt(Level)), TEXT("RecalculateDerivedStats"));
+		return AttributeStatTable->FindRow<FAttributeStatRow>(FName(*FString::FromInt(Level)), TEXT("RecalculateDerivedStats"));
 	};
 
-	//Setting new data for upgrading attributes
 	if (const FAttributeStatRow* Row = Lookup(Attributes.Vitality))
 	{
-		MaxHealth = Row->VitalityHP;
+		MaxHealth = Row->VitalityHP + EquipmentBonusHealth; //adds the equipment bonus on top of base stats
 		CurrentHealth = FMath::Clamp(CurrentHealth, 0.f, MaxHealth);
 		OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);
 	}
 
 	if (const FAttributeStatRow* Row = Lookup(Attributes.Endurance))
 	{
-		MaxStamina = Row->EnduranceStamina;
+		MaxStamina = Row->EnduranceStamina + EquipmentBonusStamina;
 		CurrentStamina = FMath::Clamp(CurrentStamina, 0.f, MaxStamina);
 		OnStaminaChanged.Broadcast(CurrentStamina, MaxStamina);
 	}
 
 	if (const FAttributeStatRow* Row = Lookup(Attributes.Mind))
 	{
-		MaxMana = Row->MindMana;
+		MaxMana = Row->MindMana + EquipmentBonusMana;
 		CurrentMana = FMath::Clamp(CurrentMana, 0.f, MaxMana);
 		OnFPChanged.Broadcast(CurrentMana, MaxMana);
 	}

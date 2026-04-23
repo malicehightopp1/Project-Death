@@ -1,17 +1,12 @@
-// Fill out your copyright notice in the Description page of Project Settings.
-
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Components/ProgressBar.h"
+#include "Components/TextBlock.h"
+#include "Components/Button.h"
 #include "Core/Systems/Player/Base/PlayerStats/CharacterStatsComp.h"
 #include "PlayerStatsPanel.generated.h"
-
-class UCharacterStatsComp;
-class UProgressBar;
-class UTextBlock;
-class UVerticalBox;
-class UButton;
 
 UCLASS()
 class PROJECT_DEATH_API UPlayerStatsPanel : public UUserWidget
@@ -25,68 +20,88 @@ protected:
     virtual void NativeConstruct() override;
     virtual void NativeDestruct() override;
 
-    // -------------------------------------------------------------------------
-    // Bound Widget References
-    // -------------------------------------------------------------------------
+    /* theres a better way to do this i could do it with one widget each and in a forloop create a widget for each stat *KEEP THIS IN MIND FOR REVISION* */
+    // Header info
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* PlayerCurrentLevel;
 
-    UPROPERTY(meta = (BindWidget)) TObjectPtr<UTextBlock> PlayerCurrentLevel;
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* PlayerXp;
 
-    UPROPERTY(meta = (BindWidget)) TObjectPtr<UTextBlock> PlayerXp;
+    UPROPERTY(meta = (BindWidget))
+    UProgressBar* PlayerXpBar;
 
-    UPROPERTY(meta = (BindWidget)) TObjectPtr<UProgressBar> PlayerXpBar;
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* PlayerStatPoints;
 
-    UPROPERTY(meta = (BindWidget)) TObjectPtr<UTextBlock> PlayerStatPoints;
+    // Vitality row
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* LevelText_Vitality;
 
-    UPROPERTY(meta = (BindWidget)) TObjectPtr<UVerticalBox> StatRowContainer;
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* ValueText_Vitality;
 
-    // -------------------------------------------------------------------------
-    // Internal State
-    // -------------------------------------------------------------------------
+    UPROPERTY(meta = (BindWidget))
+    UButton* SpendBtn_Vitality;
 
-    UPROPERTY() TObjectPtr<UCharacterStatsComp> StatsComp;
+    // Endurance row
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* LevelText_Endurance;
 
-    UPROPERTY() TArray<TObjectPtr<UButton>> SpendButtons; //used for creating the buttons that use the statcomp to upgrade the attrubutes
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* ValueText_Endurance;
 
-    // -------------------------------------------------------------------------
-    // Pawn / Component Binding
-    // -------------------------------------------------------------------------
+    UPROPERTY(meta = (BindWidget))
+    UButton* SpendBtn_Endurance;
+
+    // Mind row
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* LevelText_Mind;
+
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* ValueText_Mind;
+
+    UPROPERTY(meta = (BindWidget))
+    UButton* SpendBtn_Mind;
+
+    // Strength row
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* LevelText_Strength;
+
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* ValueText_Strength;
+
+    UPROPERTY(meta = (BindWidget))
+    UButton* SpendBtn_Strength;
+
+    // Dexterity row
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* LevelText_Dexterity;
+
+    UPROPERTY(meta = (BindWidget))
+    UTextBlock* ValueText_Dexterity;
+
+    UPROPERTY(meta = (BindWidget))
+    UButton* SpendBtn_Dexterity;
+
+private:
+    UPROPERTY()
+    UCharacterStatsComp* StatsComp = nullptr;
 
     void BindToStatsComp(APawn* Pawn);
     void UnbindFromStatsComp();
-
-    UFUNCTION()
-    void OnPawnChanged(APawn* OldPawn, APawn* NewPawn);
-
-    // -------------------------------------------------------------------------
-    // UI Building
-    // -------------------------------------------------------------------------
-
-    void BuildAttributeRows();
     void RefreshAllRows();
+    void RefreshRow(UTextBlock* LevelText, UTextBlock* ValueText, UButton* SpendBtn, FName AttributeName, int32 CurrentLevel, bool bCanSpend);
 
-    // -------------------------------------------------------------------------
-    // Delegate Callbacks
-    // -------------------------------------------------------------------------
-
+    UFUNCTION() void OnPawnChanged(APawn* OldPawn, APawn* NewPawn);
     UFUNCTION() void OnLevelChanged(int32 NewCharacterLevel);
-
     UFUNCTION() void OnXpChanged(float NewXp, float MaxXp);
-
     UFUNCTION() void OnStatPointsChanged(int32 NewStatPoints);
-
     UFUNCTION() void OnAttributesChanged(FCharacterAttributes NewAttributes);
 
-    // -------------------------------------------------------------------------
-    // Stat-Spend Button Handlers
-    // -------------------------------------------------------------------------
-
     UFUNCTION() void OnSpendVitality();
-
     UFUNCTION() void OnSpendEndurance();
-
     UFUNCTION() void OnSpendMind();
-
     UFUNCTION() void OnSpendStrength();
-
     UFUNCTION() void OnSpendDexterity();
 };

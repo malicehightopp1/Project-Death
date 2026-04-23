@@ -26,6 +26,21 @@ enum class ERarityType : uint8
 	Epic UMETA(DisplayName = "Epic"),
 	Legendary UMETA(DisplayName = "Legendary")
 };
+UENUM(BlueprintType)
+enum class EEquipmentSlot : uint8
+{
+	None        UMETA(DisplayName = "None"),
+	MainHand    UMETA(DisplayName = "Main Hand"),
+	Helmet      UMETA(DisplayName = "Helmet"),
+	Chestplate  UMETA(DisplayName = "Chestplate"),
+	Leggings    UMETA(DisplayName = "Leggings"),
+	Boots       UMETA(DisplayName = "Boots"),
+	Gloves      UMETA(DisplayName = "Gloves"),
+	Belt        UMETA(DisplayName = "Belt"),
+	HandAcc     UMETA(DisplayName = "Hand Accessory"),
+	HeadAcc     UMETA(DisplayName = "Head Accessory"),
+	Charm       UMETA(DisplayName = "Charm")
+};
 USTRUCT(BlueprintType)
 struct FItemDataInfo : public FTableRowBase
 {
@@ -48,6 +63,7 @@ struct FItemDataInfo : public FTableRowBase
 	//type information
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) EItemType ItemType;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) ERarityType ItemRarity;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) EEquipmentSlot SlotType;
 
 	//Item dropping information
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) UStaticMesh* ItemMesh;
@@ -113,6 +129,10 @@ struct FArmourDataInfo : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) int32 ArmourDefense;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) EArmourDefenseType ArmourDefenseType;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) EArmourType ArmourType;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) float BonusHealth;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) float BonusStamina;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) float BonusMana;
 };
 
 // ========================================================================================================
@@ -154,6 +174,10 @@ struct FAccessoryItemData : public FTableRowBase
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) FName ItemRowName;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) EAccessoryType AccessoryType;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) float BonusHealth;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) float BonusStamina;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) float BonusMana;
 };
 
 // ========================================================================================================

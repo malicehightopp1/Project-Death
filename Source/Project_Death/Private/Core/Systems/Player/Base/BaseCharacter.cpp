@@ -54,6 +54,8 @@ ABaseCharacter::ABaseCharacter()
 	PlayerCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("PlayerCameraComponent"));
 	PlayerCameraComponent->SetupAttachment(PlayerBloomComponent);
 	PlayerCameraComponent->bUsePawnControlRotation = false; //the bloom handles this
+	
+	EquipmentManager = CreateDefaultSubobject<UEquipmentManager>(TEXT("EquipmentManager")); //creating the equipment manager
 }
 
 // Called when the game starts or when spawned

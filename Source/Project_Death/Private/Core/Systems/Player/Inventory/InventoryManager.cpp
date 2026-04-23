@@ -6,6 +6,9 @@
 #include "Blueprint/UserWidget.h"
 #include "Core/Systems/Items/ItemData.h"
 #include "Core/Systems/Items/ItemPickup.h"
+#include "InventoryUi/PaperDollWidget.h"
+
+class UPaperDollWidget;
 
 UInventoryManager::UInventoryManager()
 {
@@ -220,6 +223,19 @@ void UInventoryManager::Inventory() //for turning on and off the UI
 
 			FInputModeGameAndUI InputMode;
 			PC->SetInputMode(InputMode);
+		}
+	}
+	if (PaperDollClass)
+	{
+		PaperDollInstance = CreateWidget<UPaperDollWidget>(PC, PaperDollClass);
+		if (PaperDollInstance)
+		{
+			PaperDollInstance->AddToViewport();
+
+			PaperDollInstance->InitializePaperDoll(
+				GetOwner()->FindComponentByClass<UEquipmentManager>(),
+				this
+			);
 		}
 	}
 }

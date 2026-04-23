@@ -66,6 +66,17 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/// stats from equipment  ------------------------------------------------------------------------------------------
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats|Equipment") float EquipmentBonusHealth = 0.f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats|Equipment") float EquipmentBonusStamina = 0.f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats|Equipment") float EquipmentBonusMana = 0.f;
+
+	UFUNCTION(BlueprintCallable, Category = "Stats") void ApplyEquipmentBonuses(float BonusHP, float BonusStam, float BonusMana);
+	
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// Attributes  ----------------------------------------------------------------------------------------------------
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	

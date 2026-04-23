@@ -8,6 +8,7 @@
 #include "InventoryManager.generated.h"
 
 
+class UPaperDollWidget;
 class AItemPickup;
 //Delegates
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInventoryChanged);
@@ -54,6 +55,9 @@ public:
 	// ------ Inventory UI Turn On ----------------------------------------------------------------------------
 	// ========================================================================================================
 	UFUNCTION() void Inventory();
+	UPROPERTY() UPaperDollWidget* PaperDollInstance;
+	UPROPERTY(EditDefaultsOnly, Category = "Player") TSubclassOf<UUserWidget> PaperDollClass; //actual class reference
+	
 	UPROPERTY() UUserWidget* InventoryWidgetInstance; //instance of the class  for creating
 	UPROPERTY(EditDefaultsOnly, Category = "Player") TSubclassOf<UUserWidget> InventoryWidgetClass; //actual class reference
 	UPROPERTY(EditDefaultsOnly, Category = "Player") bool bIsInventoryOpen = false;

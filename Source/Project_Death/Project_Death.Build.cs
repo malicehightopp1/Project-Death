@@ -18,10 +18,14 @@ public class Project_Death : ModuleRules
 			"StateTreeModule",
 			"GameplayStateTreeModule",
 			"UMG",
-			"Slate"
+			"Slate",
+			"SlateCore"
 		});
 
-		PrivateDependencyModuleNames.AddRange(new string[] { });
+		if (Target.Type == TargetType.Editor)
+		{
+			PrivateDependencyModuleNames.Add("UMGEditor");
+		}
 
 		PublicIncludePaths.AddRange(new string[] {
 			"Project_Death",

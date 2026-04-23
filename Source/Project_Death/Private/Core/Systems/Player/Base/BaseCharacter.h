@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/CapsuleComponent.h"
+#include "Core/Systems/Player/Inventory/EquipmentManager.h"
 #include "GameFramework/Character.h"
 #include "BaseCharacter.generated.h"
 
@@ -35,6 +36,8 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Equipment") class UEquipmentManager* EquipmentManager;
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// Ui ------------------------------------------------------------------------------------------------------------
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
