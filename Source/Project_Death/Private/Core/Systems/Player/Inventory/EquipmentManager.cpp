@@ -127,15 +127,13 @@ EEquipmentSlot UEquipmentManager::GetSlotForItem(FName ItemRowName)
 
 void UEquipmentManager::PushAccessoryBonusesToStats()
 {
-    // This runs after every equip or unequip
-    // Sums all accessory slots and sends the totals to CharacterStatsComp
-    if (!StatsComp || !AccessoryDataTable) return;
+    if (!StatsComp || !AccessoryDataTable || !ArmourDataTable) return;
 
     float TotalHP   = 0.f;
     float TotalStam = 0.f;
     float TotalMana = 0.f;
-    int32 TotalDmg  = 0;
 
+    // Accessory slots
     TArray<EEquipmentSlot> AccSlots = {
         EEquipmentSlot::Belt, EEquipmentSlot::HandAcc,
         EEquipmentSlot::HeadAcc, EEquipmentSlot::Charm
@@ -153,7 +151,24 @@ void UEquipmentManager::PushAccessoryBonusesToStats()
         TotalMana += Data->BonusMana;
     }
 
-    // This triggers RecalculateDerivedStats inside your stats component
-    // Which already handles clamping and broadcasting to UI
+    // Armour slots — these also carry bonus stat fields
+    TArray<EEquipmentSlot> ArmourSlots = {
+        EEquipmentSlot::Helmet, EEquipmentSlot::Chestplate,
+        EEquipmentSlot::Leggings, EEquipmentSlot::Boots,
+        EEquipmentSlot::Gloves
+    };
+
+    for (EEquipmentSlot Slot : ArmourSlots)
+    {
+        if (!IsSlotOccupied(Slot)) continue;
+        FArmourDataInfo* Data = ArmourDataTable->FindRow<FArmourDataInfo>(
+            EquippedItems[Slot], TEXT(""));
+        if (!Data) continue;
+
+        TotalHP   += Data->BonusHealth;
+        TotalStam += Data->BonusStamina;
+        TotalMana += Data->BonusMana;
+    }
+
     StatsComp->ApplyEquipmentBonuses(TotalHP, TotalStam, TotalMana);
 }

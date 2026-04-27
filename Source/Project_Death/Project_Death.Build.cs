@@ -19,7 +19,8 @@ public class Project_Death : ModuleRules
 			"GameplayStateTreeModule",
 			"UMG",
 			"Slate",
-			"SlateCore"
+			"SlateCore",
+			"Niagara"
 		});
 
 		if (Target.Type == TargetType.Editor)

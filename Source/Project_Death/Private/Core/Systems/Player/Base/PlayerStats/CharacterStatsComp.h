@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraSystem.h"
 #include "CharacterStatsComp.generated.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -107,6 +109,7 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Character Stats | Level") int64 CurrentXp= 0;
 	UPROPERTY(BlueprintReadOnly, Category = "Character Stats | Level") int64 MaxXp = 0;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effects") UNiagaraSystem* LevelUpEffect;
 	//XP Delegates
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Stats | Level") FOnCharacterLevelUp OnLevelChange; 
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Stats | Level") FOnStatPointsChanged OnStatPointsChanged;

@@ -138,9 +138,30 @@ void UCharacterStatsComp::PlayerLevelUp()
 	
 	MaxXp = CalculateXpCostForNextLevel(CharacterLevel);
 	
+	//setting stats to max on level up *common rpg practice*
+	CurrentHealth = MaxHealth;
+	CurrentStamina = MaxStamina;
+	CurrentMana = MaxMana;
+	
 	OnLevelChange.Broadcast(CharacterLevel);
 	OnStatPointsChanged.Broadcast(UnspentStatPoints);
 	OnXpChanged.Broadcast(CurrentXp, MaxXp);
+	OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);
+	OnStaminaChanged.Broadcast(CurrentStamina, MaxStamina);
+	OnFPChanged.Broadcast(CurrentMana, MaxMana);
+	
+	    if (LevelUpEffect)
+        {
+            if (AActor* Owner = GetOwner())
+            {
+                UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+                    GetWorld(),
+                    LevelUpEffect,
+                    Owner->GetActorLocation(),
+                    Owner->GetActorRotation()
+                );
+            }
+        }
 }
 int64 UCharacterStatsComp::CalculateXpCostForNextLevel(int32 Level)
 {
