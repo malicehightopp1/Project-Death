@@ -129,7 +129,7 @@ void UPlayerWidget::OnCurrencyChange(int32 NewCurrency)
 {
 	if (!CurrencyText) return;
 	
-	FText FormattedCurrency = FText::Format(NSLOCTEXT("Level", "LevelKey", "{0} $"), 
+	FText FormattedCurrency = FText::Format(NSLOCTEXT("Level", "LevelKey", "{0}"), 
 		FText::AsNumber(NewCurrency));
 	
 	CurrencyText->SetText(FormattedCurrency);

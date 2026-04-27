@@ -74,10 +74,10 @@ bool UCharacterStatsComp::SpendStatPoint(FName AttributeName)
 {
 	if (UnspentStatPoints <= 0) return false;
 
-	if (AttributeName == "Vitality")  Attributes.Vitality++;
+	if (AttributeName == "Vitality") Attributes.Vitality++;
 	else if (AttributeName == "Endurance") Attributes.Endurance++;
-	else if (AttributeName == "Mind")      Attributes.Mind++;
-	else if (AttributeName == "Strength")  Attributes.Strength++;
+	else if (AttributeName == "Mind") Attributes.Mind++;
+	else if (AttributeName == "Strength") Attributes.Strength++;
 	else if (AttributeName == "Dexterity") Attributes.Dexterity++;
 	else return false;
 
@@ -150,18 +150,19 @@ void UCharacterStatsComp::PlayerLevelUp()
 	OnStaminaChanged.Broadcast(CurrentStamina, MaxStamina);
 	OnFPChanged.Broadcast(CurrentMana, MaxMana);
 	
-	    if (LevelUpEffect)
+	//spawning a leveling affect
+	if (LevelUpEffect)
+    {
+        if (AActor* Owner = GetOwner())
         {
-            if (AActor* Owner = GetOwner())
-            {
-                UNiagaraFunctionLibrary::SpawnSystemAtLocation(
-                    GetWorld(),
-                    LevelUpEffect,
-                    Owner->GetActorLocation(),
-                    Owner->GetActorRotation()
-                );
-            }
+            UNiagaraFunctionLibrary::SpawnSystemAtLocation(
+                GetWorld(),
+                LevelUpEffect,
+                Owner->GetActorLocation(),
+                Owner->GetActorRotation()
+            );
         }
+    }
 }
 int64 UCharacterStatsComp::CalculateXpCostForNextLevel(int32 Level)
 {

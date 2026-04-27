@@ -13,14 +13,9 @@ void UEquipmentManager::BeginPlay()
 {
     Super::BeginPlay();
 
-    // Find sibling components on the same actor
     InventoryManager = GetOwner()->FindComponentByClass<UInventoryManager>();
     StatsComp = GetOwner()->FindComponentByClass<UCharacterStatsComp>();
 }
-
-// ========================================================================================================
-// ------ Core --------------------------------------------------------------------------------------------
-// ========================================================================================================
 
 bool UEquipmentManager::EquipItem(FName ItemRowName)
 {
@@ -68,10 +63,6 @@ FName UEquipmentManager::GetItemInSlot(EEquipmentSlot Slot)
     if (!IsSlotOccupied(Slot)) return NAME_None;
     return EquippedItems[Slot];
 }
-
-// ========================================================================================================
-// ------ Stat Queries ------------------------------------------------------------------------------------
-// ========================================================================================================
 
 int32 UEquipmentManager::GetTotalArmourDefense()
 {
@@ -151,7 +142,6 @@ void UEquipmentManager::PushAccessoryBonusesToStats()
         TotalMana += Data->BonusMana;
     }
 
-    // Armour slots — these also carry bonus stat fields
     TArray<EEquipmentSlot> ArmourSlots = {
         EEquipmentSlot::Helmet, EEquipmentSlot::Chestplate,
         EEquipmentSlot::Leggings, EEquipmentSlot::Boots,
