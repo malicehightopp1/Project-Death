@@ -26,7 +26,6 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Equipment")UDataTable* ArmourDataTable;
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Equipment")UDataTable* AccessoryDataTable;
 
-    
     UPROPERTY(BlueprintAssignable, Category = "Equipment")FOnEquipmentChanged OnEquipmentChanged;
 
     UFUNCTION(BlueprintCallable, Category = "Equipment")bool EquipItem(FName ItemRowName);

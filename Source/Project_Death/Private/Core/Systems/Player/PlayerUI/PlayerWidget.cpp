@@ -66,7 +66,7 @@ void UPlayerWidget::OnLevelChanged(int32 NewCharacterLevel)
 {
 	if (!PlayerCurrentLevel) return;
 	
-	FText FormattedLevel = FText::Format(NSLOCTEXT("Level", "LevelKey", "Level: {0}"), 
+	FText FormattedLevel = FText::Format(NSLOCTEXT("Level", "LevelKey", "Lv: {0}"), 
 		FText::AsNumber(NewCharacterLevel));
 	
 	PlayerCurrentLevel->SetText(FormattedLevel);

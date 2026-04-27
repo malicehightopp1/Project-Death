@@ -9,7 +9,6 @@ void UEquipmentSlotWidget::NativeConstruct()
 {
     Super::NativeConstruct();
 
-    // Wire the button click to OnSlotClicked
     if (SlotButton)
     {
         SlotButton->OnClicked.AddDynamic(this, &UEquipmentSlotWidget::OnSlotClicked);
@@ -24,10 +23,8 @@ void UEquipmentSlotWidget::RefreshSlot()
 
     if (bIsOccupied)
     {
-        // Get the item row name sitting in this slot
         FName RowName = EquipmentManager->GetItemInSlot(SlotType);
 
-        // Pull the icon and name from ItemDataTable via InventoryManager
         if (InventoryManager && InventoryManager->ItemDataTable)
         {
             FItemDataInfo* Data = InventoryManager->ItemDataTable->FindRow<FItemDataInfo>(
@@ -38,7 +35,6 @@ void UEquipmentSlotWidget::RefreshSlot()
                 ItemIcon = Data->ItemTexture;
                 ItemName = FText::FromName(Data->ItemName);
 
-                // Push icon into the UMG Image widget
                 if (SlotIcon && ItemIcon)
                 {
                     SlotIcon->SetBrushFromTexture(ItemIcon);
@@ -49,7 +45,6 @@ void UEquipmentSlotWidget::RefreshSlot()
     }
     else
     {
-        // Slot is empty — clear the icon
         ItemIcon = nullptr;
         ItemName = FText::GetEmpty();
 
@@ -64,12 +59,7 @@ void UEquipmentSlotWidget::OnSlotClicked()
 {
     if (!EquipmentManager) return;
 
-    // Only do something if there is an item here
     if (!bIsOccupied) return;
 
-    // Unequip sends it straight back to inventory
     EquipmentManager->UnequipItem(SlotType);
-
-    // RefreshSlot is NOT called here directly
-    // The paper doll widget listens to OnEquipmentChanged and refreshes all slots
 }
