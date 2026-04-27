@@ -106,7 +106,7 @@ void ABaseCharacter::Interact(const FInputActionValue& Value) //setting the defi
 
 	UE_LOG(LogTemp, Display, TEXT("Interact called"));
 	UKismetSystemLibrary::SphereTraceSingle(this, start, end, 5.0f, UEngineTypes::ConvertToTraceType(ECC_Visibility), //Persistent for testing purposes
-		false, TArray<AActor*>(), EDrawDebugTrace::Persistent, *Hit, true);
+		false, TArray<AActor*>(), EDrawDebugTrace::None, *Hit, true);
 	
 	if (Hit->GetActor() != nullptr)
 	{

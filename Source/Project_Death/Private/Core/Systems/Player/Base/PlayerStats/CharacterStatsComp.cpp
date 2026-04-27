@@ -191,6 +191,7 @@ void UCharacterStatsComp::OnHealthChange(float mHealthAddAmount)
 void UCharacterStatsComp::PlayerDeath()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Player has died!!!"))
+	
 	OnDeath.Broadcast();
 }
 #pragma endregion PlayerHealth

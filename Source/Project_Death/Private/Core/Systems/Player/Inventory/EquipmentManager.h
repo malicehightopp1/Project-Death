@@ -36,6 +36,22 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Equipment|Stats")int32 GetTotalArmourDefense();
     UFUNCTION(BlueprintCallable, Category = "Equipment|Stats")float GetEquippedWeaponAttackSpeed();
     UFUNCTION(BlueprintCallable, Category = "Equipment|Stats")EWeaponDataType GetEquippedWeaponType();
+
+    /*
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Equipment|Slots")
+    FItemDataInfo HeadSlot;
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Equipment|Slots")
+    FItemDataInfo ChestSlot;
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Equipment|Slots")
+    FItemDataInfo ArmSlot;
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Equipment|Slots")
+    FItemDataInfo LegSlot;
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Equipment|Slots")
+    FItemDataInfo FeetSlot;
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Equipment|Slots")
+    FItemDataInfo WeaponSlot;
+    */
+    
 protected:
     virtual void BeginPlay() override;
 

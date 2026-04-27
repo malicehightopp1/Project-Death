@@ -102,9 +102,6 @@ EWeaponDataType UEquipmentManager::GetEquippedWeaponType()
     return Data ? Data->WeaponType : EWeaponDataType::MiscWeapon;
 }
 
-// ========================================================================================================
-// ------ Private -----------------------------------------------------------------------------------------
-// ========================================================================================================
 
 EEquipmentSlot UEquipmentManager::GetSlotForItem(FName ItemRowName)
 {
@@ -132,13 +129,12 @@ void UEquipmentManager::PushAccessoryBonusesToStats()
         FAccessoryItemData* Data = AccessoryDataTable->FindRow<FAccessoryItemData>( EquippedItems[Slot], TEXT(""));
         if (!Data) continue;
 
-        TotalHP   += Data->BonusHealth;
+        TotalHP += Data->BonusHealth;
         TotalStam += Data->BonusStamina;
         TotalMana += Data->BonusMana; 
     }
 
-    TArray<EEquipmentSlot> ArmourSlots = {EEquipmentSlot::Helmet, EEquipmentSlot::Chestplate,EEquipmentSlot::Leggings, EEquipmentSlot::Boots,EEquipmentSlot::Gloves
-    };
+    TArray<EEquipmentSlot> ArmourSlots = {EEquipmentSlot::Helmet, EEquipmentSlot::Chestplate,EEquipmentSlot::Leggings, EEquipmentSlot::Boots,EEquipmentSlot::Gloves};
 
     for (EEquipmentSlot Slot : ArmourSlots)
     {
@@ -146,7 +142,7 @@ void UEquipmentManager::PushAccessoryBonusesToStats()
         FArmourDataInfo* Data = ArmourDataTable->FindRow<FArmourDataInfo>( EquippedItems[Slot], TEXT(""));
         if (!Data) continue;
 
-        TotalHP   += Data->BonusHealth;
+        TotalHP += Data->BonusHealth;
         TotalStam += Data->BonusStamina;
         TotalMana += Data->BonusMana;
     }
