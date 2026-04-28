@@ -36,8 +36,13 @@ public:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-	
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/// References -----------------------------------------------------------------------------------------------------
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Equipment") class UEquipmentManager* EquipmentManager;
+	UPROPERTY(EditDefaultsOnly, Category = "Player | Ref") UInventoryManager* InventoryManagerRef;
+	
+	UPROPERTY(BlueprintReadOnly) bool bIsAttacking = false;
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// Ui ------------------------------------------------------------------------------------------------------------
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -50,18 +55,13 @@ public:
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	UPROPERTY(BlueprintReadOnly, Category = "Player | Movement | Dodge") bool bIsDodging = false;
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Player | Movement | Dodge") FVector DodgeDirection;
-
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	/// Inventory ------------------------------------------------------------------------------------------------------
-	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	UPROPERTY(EditDefaultsOnly, Category = "Player | Ref") UInventoryManager* InventoryManagerRef;
-	
 private:
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// Input Action Functions -----------------------------------------------------------------------------------------
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	UFUNCTION() void Interact(const FInputActionValue& Value);
 	UFUNCTION() void InventoryToggle(const FInputActionValue& Value);
+	UFUNCTION() void Attack(const FInputActionValue& Value);
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// Input actions --------------------------------------------------------------------------------------------------
@@ -69,6 +69,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Player | Player Input") UInputAction* InteractionAction;
 	UPROPERTY(EditDefaultsOnly, Category = "Player | Player Input") UInputAction* InventoryAction;
 	UPROPERTY(EditDefaultsOnly, Category = "Player | Player Input") UInputAction* PauseAction;
+	UPROPERTY(EditDefaultsOnly, Category = "Player | Player Input") UInputAction* AttackAction;
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// Dodge ----------------------------------------------------------------------------------------------------------
@@ -92,4 +93,19 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Player | PlayerComp") UCameraComponent* PlayerCameraComponent;
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Player | PlayerComp") UCharacterMovementComponent* PlayerMovementComponent;
+	
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/// Attack ---------------------------------------------------------------------------------------------------------
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	UFUNCTION(blueprintCallable, Category = "Player | PlayerAttack") void PerformSphereAttack();
+	UFUNCTION(BlueprintCallable) void OnAttackEnd();
+	UFUNCTION(BlueprintCallable) void OnAttackHitFrame();
+	UFUNCTION() void LockRotation(bool bLock);
+	UPROPERTY(EditDefaultsOnly, Category = "Player | PlayerAttack") float AttackRadius = 80.0f;
+	UPROPERTY(EditDefaultsOnly, Category = "Player | PlayerAttack") float AttackDamage = 20.0f;
+	UPROPERTY(EditDefaultsOnly, Category = "Player | PlayerAttack") float AttackRange = 150.0f;
+
+	TArray<TWeakObjectPtr<AActor>> HitActorsThisSwing;  //TWeakObjectPtr so it doesnt crash 
+	
+	UPROPERTY(EditAnywhere, Category = "Player | PlayerAttack") UAnimMontage* AttackMontage;
 };

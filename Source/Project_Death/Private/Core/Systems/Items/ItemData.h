@@ -152,6 +152,7 @@ struct FArmourDataInfo : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) float BonusHealth;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) float BonusStamina;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) float BonusMana;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInto) float BonusAttack;
 };
 
 // ========================================================================================================

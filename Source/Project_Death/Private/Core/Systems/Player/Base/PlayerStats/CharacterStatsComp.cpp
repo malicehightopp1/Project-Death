@@ -61,11 +61,18 @@ void UCharacterStatsComp::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	OnManaRegen(DeltaTime);
 }
 
-void UCharacterStatsComp::ApplyEquipmentBonuses(float BonusHP, float BonusStam, float BonusMana)
+float UCharacterStatsComp::GetTotalDamage() const
+{
+	float StrengthBonus = Attributes.Strength * 2.5f;
+	return BaseDamage + StrengthBonus + EquipmentBonusDamage;
+}
+
+void UCharacterStatsComp::ApplyEquipmentBonuses(float BonusHP, float BonusStam, float BonusMana, float BonusDamage)
 {
 	EquipmentBonusHealth  = BonusHP;
 	EquipmentBonusStamina = BonusStam;
-	EquipmentBonusMana    = BonusMana;
+	EquipmentBonusMana = BonusMana;
+	EquipmentBonusDamage = BonusDamage;
 
 	RecalculateDerivedStats(); //update stats immediatly
 }
@@ -112,6 +119,12 @@ void UCharacterStatsComp::RecalculateDerivedStats()
 		OnStaminaChanged.Broadcast(CurrentStamina, MaxStamina);
 	}
 
+	if (const FAttributeStatRow* Row = Lookup(Attributes.Mind))
+	{
+		MaxMana = Row->MindMana + EquipmentBonusMana;
+		CurrentMana = FMath::Clamp(CurrentMana, 0.f, MaxMana);
+		OnFPChanged.Broadcast(CurrentMana, MaxMana);
+	}
 	if (const FAttributeStatRow* Row = Lookup(Attributes.Mind))
 	{
 		MaxMana = Row->MindMana + EquipmentBonusMana;

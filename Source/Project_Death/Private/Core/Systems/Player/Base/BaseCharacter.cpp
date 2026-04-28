@@ -8,9 +8,11 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Core/Systems/Enemies/Enemy Stats/EnemyBaseStatsComp.h"
 #include "Core/Systems/Interactions/InteractionManager.h"
 #include "Core/Systems/Player/Inventory/InventoryManager.h"
 #include "Core/Systems/Player/PlayerUI/PlayerWidget.h"
+#include "Engine/OverlapResult.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "PlayerStats/CharacterStatsComp.h"
@@ -58,6 +60,7 @@ ABaseCharacter::ABaseCharacter()
 	EquipmentManager = CreateDefaultSubobject<UEquipmentManager>(TEXT("EquipmentManager")); //creating the equipment manager
 }
 
+#pragma region BasicSetup
 // Called when the game starts or when spawned
 void ABaseCharacter::BeginPlay()
 {
@@ -95,9 +98,14 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 		//Inventory
 		EnhancedInputComponent->BindAction(InventoryAction, ETriggerEvent::Started, this, &ABaseCharacter::InventoryToggle);
+		
+		//attack
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &ABaseCharacter::Attack);
 	}
 }
 
+#pragma endregion
+#pragma region interactions
 void ABaseCharacter::Interact(const FInputActionValue& Value) //setting the definition for interaction *TODO Add a ui that pops up over items the player walks up to*
 {
 	FHitResult* Hit = new FHitResult();
@@ -126,7 +134,8 @@ void ABaseCharacter::InventoryToggle(const FInputActionValue& Value) //toggling 
 	}
 	InventoryManagerRef->Inventory(); //turning inventory on from inventory manager
 }
-
+#pragma endregion
+#pragma region Dodging
 void ABaseCharacter::PlayerDodge() //dodge for player
 {
 	if (bIsDodging) return; //don't allow player to dodge if already dodging
@@ -154,8 +163,88 @@ void ABaseCharacter::PlayerDodgeEnd() //resetting the dodge *use this for anim n
 	bIsDodging = false;
 	DodgeDirection = FVector::ZeroVector;
 }
-
+#pragma endregion
+#pragma region Sprinting
 void ABaseCharacter::OnSprintChanged(bool bSprinting)
 {
 	GetCharacterMovement()->MaxWalkSpeed = bSprinting ? SprintSpeed : WalkSpeed;
 }
+#pragma endregion
+#pragma region Attack
+void ABaseCharacter::Attack(const FInputActionValue& Value)
+{
+	if (bIsAttacking) return;
+	if (UCharacterStatsComp* PlayerStats = FindComponentByClass<UCharacterStatsComp>())
+	{
+		if (PlayerStats->CurrentStamina > 29)
+		{
+			PlayerStats->OnStaminaChange(30);
+			UAnimInstance* animInstance = GetMesh()->GetAnimInstance();
+			if (!animInstance || !AttackMontage) return;
+			
+			bIsAttacking = true;
+			LockRotation(true);
+			animInstance->Montage_Play(AttackMontage);
+		}
+	}
+}
+
+void ABaseCharacter::PerformSphereAttack()
+{
+	HitActorsThisSwing.Empty();
+	
+	FVector Origin = GetActorLocation() + (GetActorForwardVector() * AttackRange); //geting what is infront of the player
+	FCollisionQueryParams CollisionQueryParams;
+	CollisionQueryParams.AddIgnoredActor(this); //so i dont hit myself
+	
+	
+	//setting up the overlap sphere
+	TArray<FOverlapResult> HitResults;
+	GetWorld()->OverlapMultiByChannel(
+	 HitResults,
+		Origin,
+		FQuat::Identity,
+		ECC_Pawn,
+		FCollisionShape::MakeSphere(AttackRadius),
+		CollisionQueryParams
+	);
+	
+	for (const FOverlapResult& Result : HitResults)
+	{
+		AActor* HitActor = Result.GetActor();
+		if (!HitActor || HitActorsThisSwing.Contains(HitActor)) continue;
+		HitActorsThisSwing.Add(HitActor);
+		
+		float FinalDamage = AttackDamage;
+		if (CharacterStats)
+		{
+			FinalDamage = CharacterStats->GetTotalDamage(); //grabbing damage off stats component calculated there
+		}
+		
+		UEnemyBaseStatsComp* Enemystats = HitActor->FindComponentByClass<UEnemyBaseStatsComp>();
+		if (Enemystats)
+		{
+			Enemystats->EnemyHealthChange(FinalDamage);
+		}
+	}
+	DrawDebugSphere(GetWorld(), Origin, AttackRadius, 16, FColor::Red, false, 1.f);
+}
+
+void ABaseCharacter::OnAttackEnd() //call at end
+{
+	bIsAttacking = false;
+	HitActorsThisSwing.Empty();
+	LockRotation(false);
+}
+
+void ABaseCharacter::OnAttackHitFrame() //call when the attack hits
+{
+	PerformSphereAttack();
+}
+
+void ABaseCharacter::LockRotation(bool bLock)
+{
+	PlayerMovementComponent->bOrientRotationToMovement = !bLock;
+	bUseControllerRotationYaw = bLock;
+}
+#pragma endregion

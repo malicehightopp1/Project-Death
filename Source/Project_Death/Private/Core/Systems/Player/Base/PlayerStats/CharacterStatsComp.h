@@ -75,8 +75,11 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats|Equipment") float EquipmentBonusStamina = 0.f;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats|Equipment") float EquipmentBonusMana = 0.f;
-
-	UFUNCTION(BlueprintCallable, Category = "Stats") void ApplyEquipmentBonuses(float BonusHP, float BonusStam, float BonusMana);
+	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Stats|Equipment") float EquipmentBonusDamage = 0.f;
+	
+	UFUNCTION(BlueprintCallable, Category = "Stats|Equipment") float GetTotalDamage() const;
+	UFUNCTION(BlueprintCallable, Category = "Stats") void ApplyEquipmentBonuses(float BonusHP, float BonusStam, float BonusMana, float BonusDamage);
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// Attributes  ----------------------------------------------------------------------------------------------------
@@ -175,6 +178,8 @@ public:
 	
 	//Mana Delegates
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Character Stats | CharacterMana") FOnFPChanged OnFPChanged; 
+	
+	UPROPERTY(BlueprintReadOnly, Category = "Character Stats | CharacterDamage") float BaseDamage = 10;
 private:
 	UFUNCTION() void PlayerLevelUp();
 	UFUNCTION() static int64 CalculateXpCostForNextLevel(int32 Level);

@@ -3,6 +3,8 @@
 
 #include "Core/Systems/Enemies/Enemy Stats/EnemyBaseStatsComp.h"
 
+#include "Core/Systems/Player/Base/PlayerStats/CharacterStatsComp.h"
+
 // Sets default values for this component's properties
 UEnemyBaseStatsComp::UEnemyBaseStatsComp()
 {
@@ -20,6 +22,7 @@ void UEnemyBaseStatsComp::BeginPlay()
 
 	OnHealthChanged.Broadcast(EnemyCurrentHealth, EnemyMaxHealth);
 	OnDeathChanged.Broadcast(false);
+	bIsEnemyDead = false;
 }
 
 
@@ -39,8 +42,29 @@ void UEnemyBaseStatsComp::EnemyHealthChange(float DamageToTake)
 	OnHealthChanged.Broadcast(EnemyCurrentHealth, EnemyMaxHealth);
 	if (EnemyCurrentHealth <= 0)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Enemy Died!!"))
+		bIsEnemyDead = true;
+		EnemyDeath();
 		OnDeathChanged.Broadcast(true);
+	}
+}
+
+void UEnemyBaseStatsComp::EnemyDeath()
+{
+	if (APlayerController* PC = GetWorld()->GetFirstPlayerController())
+	{
+		if (APawn* Pawn = PC->GetPawn())
+		{
+			if(UCharacterStatsComp* playerstats = Pawn->FindComponentByClass<UCharacterStatsComp>())
+			{
+				if (bIsEnemyDead)
+				{
+					playerstats->OnXpChange(XpToGive); //giving xp on death
+					bIsEnemyDead = false;
+					AActor* actor = GetOwner();
+					actor->Destroy();
+				}
+			}
+		}
 	}
 }
 

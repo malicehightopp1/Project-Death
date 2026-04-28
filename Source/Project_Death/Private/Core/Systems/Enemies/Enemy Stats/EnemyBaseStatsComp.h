@@ -28,11 +28,13 @@ public:
 
 	UPROPERTY(BlueprintAssignable, BlueprintCallable) FOnEnemyHealthChanged OnHealthChanged;
 	UPROPERTY(BlueprintAssignable, BlueprintCallable) FOnEnemyDeath OnDeathChanged;
+	UFUNCTION(BlueprintCallable) void EnemyHealthChange(float DamageToTake);
+	UFUNCTION(BlueprintCallable) void EnemyDeath();
 	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enemy Death") float XpToGive = 20;
 	UPROPERTY(EditAnywhere, Category = "Ai Enemy | Stats") float EnemyCurrentHealth = 0.0f;
 	UPROPERTY(EditAnywhere, Category = "Ai Enemy | Stats") float EnemyMaxHealth = 100.0f;
-private:
-
-	UFUNCTION(BlueprintCallable) void EnemyHealthChange(float DamageToTake);
 	
+private:
+	UPROPERTY() bool bIsEnemyDead = false;
 };
