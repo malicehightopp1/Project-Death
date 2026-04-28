@@ -63,7 +63,7 @@ void UCharacterStatsComp::TickComponent(float DeltaTime, ELevelTick TickType, FA
 
 float UCharacterStatsComp::GetTotalDamage() const
 {
-	float StrengthBonus = Attributes.Strength * 2.5f;
+	float StrengthBonus = Attributes.Strength * 2.5f; //the 2.5 is the multipy thay the strength sttribute gives to damage so base is 10 and say the strength level is 10 - 25 damage total damage will be 35
 	return BaseDamage + StrengthBonus + EquipmentBonusDamage;
 }
 

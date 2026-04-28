@@ -225,6 +225,7 @@ void ABaseCharacter::PerformSphereAttack()
 		if (Enemystats)
 		{
 			Enemystats->EnemyHealthChange(FinalDamage);
+			UE_LOG(LogTemp, Display, TEXT("Damage given: %f"), FinalDamage) 
 		}
 	}
 	DrawDebugSphere(GetWorld(), Origin, AttackRadius, 16, FColor::Red, false, 1.f);
