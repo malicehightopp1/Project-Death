@@ -1,65 +1,48 @@
 #include "PaperDollWidget.h"
-#include "Blueprint/UserWidget.h"
-#include "Blueprint/WidgetTree.h"
 #include "Core/Systems/Player/Inventory/EquipmentManager.h"
 #include "Core/Systems/Player/Inventory/InventoryManager.h"
 
 void UPaperDollWidget::NativeConstruct()
 {
-    Super::NativeConstruct();
+	Super::NativeConstruct();
+}
+
+void UPaperDollWidget::NativeDestruct()
+{
+	// Clean up delegate so we don't fire into a dead widget
+	if (EquipmentManager)
+		EquipmentManager->OnEquipmentChanged.RemoveDynamic(
+			this, &UPaperDollWidget::OnEquipmentChanged);
+
+	Super::NativeDestruct();
 }
 
 void UPaperDollWidget::InitializePaperDoll(UEquipmentManager* InEquipmentManager,
-                                            UInventoryManager* InInventoryManager)
+											UInventoryManager* InInventoryManager)
 {
-    EquipmentManager = InEquipmentManager;
-    InventoryManager = InInventoryManager;
+	EquipmentManager = InEquipmentManager;
+	InventoryManager = InInventoryManager;
 
-    if (!EquipmentManager) return;
+	if (!EquipmentManager) return;
 
-    EquipmentManager->OnEquipmentChanged.AddDynamic(
-        this, &UPaperDollWidget::OnEquipmentChanged);
+	EquipmentManager->OnEquipmentChanged.AddDynamic(
+		this, &UPaperDollWidget::OnEquipmentChanged);
 
-    RefreshAllSlots();
+	RefreshAllSlots();
 }
 
 void UPaperDollWidget::OnEquipmentChanged()
 {
-    RefreshAllSlots();
+	RefreshAllSlots();
 }
 
 void UPaperDollWidget::RefreshAllSlots()
 {
-
-    if (!WidgetTree) return;
-
-    WidgetTree->ForEachWidget([&](UWidget* Widget)
-    {
-        if (!Widget) return;
-        
-        UFunction* PopulateFunc = Widget->FindFunction(TEXT("PopulateSpot"));
-        if (!PopulateFunc) return;
-
-        // Only call on slots marked as equipment slots
-        FBoolProperty* IsEquipProp = FindFProperty<FBoolProperty>(
-            Widget->GetClass(), TEXT("bIsEquipmentSlot"));
-        if (!IsEquipProp) return;
-
-        bool bIsEquip = IsEquipProp->GetPropertyValue_InContainer(Widget);
-        if (!bIsEquip) return;
-        
-        struct FPopulateParams
-        {
-            FName  ItemRowName = NAME_None;
-            int32  Quantity    = 0;
-            bool   bIsEmpty    = true;
-            int32  SlotIndex   = 0;
-            UInventoryManager* InvManager = nullptr;
-        };
-
-        FPopulateParams Params;
-        Params.InvManager = InventoryManager;
-
-        Widget->ProcessEvent(PopulateFunc, &Params);
-    });
+	// Intentionally left minimal — the heavy lifting is in
+	// the Blueprint refreshSlots function which reads the named
+	// slot properties (HeadSlot, ChestSlot, etc.) directly and
+	// calls PopulateSpot on each widget. This function exists
+	// so Blueprint can call it and so the delegate can trigger it.
+	//
+	// If you move refreshSlots to C++ later, implement it here.
 }

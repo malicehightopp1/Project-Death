@@ -46,14 +46,12 @@ void UPlayerWidget::NativeConstruct() //Begin play
 		
 		StatsComp->OnLevelChange.AddDynamic(this, &UPlayerWidget::OnLevelChanged);
 		StatsComp->OnXpChanged.AddDynamic(this, &UPlayerWidget::OnXpChanged);
-		StatsComp->OnStatPointsChanged.AddDynamic(this, &UPlayerWidget::OnStatPointsChanged);
 		StatsComp->OnHealthChanged.AddDynamic(this, &UPlayerWidget::OnHealthChanged);
 		StatsComp->OnStaminaChanged.AddDynamic(this, &UPlayerWidget::OnStaminaChanged);
 		StatsComp->OnFPChanged.AddDynamic(this, &UPlayerWidget::OnManaChange);
 		
 		OnLevelChanged(StatsComp->CharacterLevel);
 		OnXpChanged(StatsComp->CurrentXp, StatsComp->MaxXp);
-		OnStatPointsChanged(StatsComp->UnspentStatPoints);
 		OnHealthChanged(StatsComp->CurrentHealth, StatsComp->MaxHealth);
 		OnStaminaChanged(StatsComp->CurrentStamina, StatsComp->MaxStamina);
 		OnManaChange(StatsComp->CurrentMana, StatsComp->MaxMana);
@@ -83,16 +81,6 @@ void UPlayerWidget::OnXpChanged(float NewXp, float MaxXp)
 	
 	if (!PlayerXpBar) return;
 	PlayerXpBar->SetPercent(MaxXp > 0.f ? NewXp / MaxXp : 0.f);
-}
-
-void UPlayerWidget::OnStatPointsChanged(int32 NewStatPoints)
-{
-	if (!PlayerStatPoints) return;
-	
-	FText FormattedStatPoints = FText::Format(NSLOCTEXT("Level", "LevelKey", "StatPoints: {0}"), 
-		FText::AsNumber(NewStatPoints));
-	
-	PlayerStatPoints->SetText(FormattedStatPoints);
 }
 
 void UPlayerWidget::OnHealthChanged(float NewHealth, float MaxHealth)

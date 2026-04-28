@@ -1,5 +1,4 @@
 #include "EquipmentManager.h"
-
 #include "InventoryManager.h"
 #include "Core/Systems/Player/Base/PlayerStats/CharacterStatsComp.h"
 #include "Core/Systems/Items/ItemData.h"
@@ -12,137 +11,207 @@ UEquipmentManager::UEquipmentManager()
 void UEquipmentManager::BeginPlay()
 {
     Super::BeginPlay();
-
     InventoryManager = GetOwner()->FindComponentByClass<UInventoryManager>();
     StatsComp = GetOwner()->FindComponentByClass<UCharacterStatsComp>();
 }
 
+// ----------------------------------------------------------------
+// GetSlotByEnum — maps EEquipmentSlot to a named property pointer
+// This is the single place you add a new slot type in future.
+// ----------------------------------------------------------------
+FEquipmentSlotData* UEquipmentManager::GetSlotByEnum(EEquipmentSlot Slot)
+{
+    switch (Slot)
+    {
+        case EEquipmentSlot::Helmet:      return &HeadSlot;
+        case EEquipmentSlot::Chestplate:  return &ChestSlot;
+        case EEquipmentSlot::Leggings:    return &LegsSlot;
+        case EEquipmentSlot::Boots:       return &BootsSlot;
+        case EEquipmentSlot::Gloves:      return &GlovesSlot;
+        case EEquipmentSlot::MainHand:    return &MainHandSlot;
+        case EEquipmentSlot::Belt:        return &BeltSlot;
+        case EEquipmentSlot::HandAcc:     return &HandAccSlot;
+        case EEquipmentSlot::HeadAcc:     return &HeadAccSlot;
+        case EEquipmentSlot::Charm:       return &CharmSlot;
+        default:                          return nullptr;
+    }
+}
+
+const FEquipmentSlotData* UEquipmentManager::GetSlotByEnum(EEquipmentSlot Slot) const
+{
+    // Const version — reuse non-const via cast trick
+    return const_cast<UEquipmentManager*>(this)->GetSlotByEnum(Slot);
+}
+
+// ----------------------------------------------------------------
+// GetSlotTypeForItem
+// ----------------------------------------------------------------
+EEquipmentSlot UEquipmentManager::GetSlotTypeForItem(FName ItemRowName) const
+{
+    if (!ItemDataTable) return EEquipmentSlot::None;
+    const FItemDataInfo* Data = ItemDataTable->FindRow<FItemDataInfo>(ItemRowName, TEXT(""));
+    return Data ? Data->SlotType : EEquipmentSlot::None;
+}
+
+// ----------------------------------------------------------------
+// EquipItem
+// ----------------------------------------------------------------
 bool UEquipmentManager::EquipItem(FName ItemRowName)
 {
     if (!InventoryManager || !ItemDataTable) return false;
 
-    EEquipmentSlot TargetSlot = GetSlotForItem(ItemRowName);
+    // Look up which slot this item belongs in
+    const FItemDataInfo* ItemData = ItemDataTable->FindRow<FItemDataInfo>(ItemRowName, TEXT(""));
+    if (!ItemData) return false;
+
+    EEquipmentSlot TargetSlot = ItemData->SlotType;
     if (TargetSlot == EEquipmentSlot::None) return false;
 
-    // If slot occupied, send old item back to inventory first
-    if (IsSlotOccupied(TargetSlot))
+    FEquipmentSlotData* Slot = GetSlotByEnum(TargetSlot);
+    if (!Slot) return false;
+
+    // If something is already in the slot, return it to inventory first
+    if (Slot->bIsOccupied)
     {
-        FName OldItem = EquippedItems[TargetSlot];
-        InventoryManager->AddItemToInventory(OldItem, 1);
+        InventoryManager->AddItemToInventory(Slot->ItemData.ItemRowName, 1);
     }
 
-    InventoryManager->RemoveItemFromInventory(ItemRowName, 1);
-    EquippedItems.Add(TargetSlot, ItemRowName);
+    // Write the new item into the named slot
+    Slot->ItemData = *ItemData;
+    Slot->ItemData.ItemRowName = ItemRowName;  // store the key so we can return it later
+    Slot->bIsOccupied = true;
 
-    PushAccessoryBonusesToStats(); // Recalculate stats after any change
+    // Remove from inventory
+    InventoryManager->RemoveItemFromInventory(ItemRowName, 1);
+
+    PushStatBonuses();
     OnEquipmentChanged.Broadcast();
     return true;
 }
 
-bool UEquipmentManager::UnequipItem(EEquipmentSlot Slot)
+// ----------------------------------------------------------------
+// UnequipSlot
+// ----------------------------------------------------------------
+bool UEquipmentManager::UnequipSlot(EEquipmentSlot Slot)
 {
-    if (!IsSlotOccupied(Slot) || !InventoryManager) return false;
+    if (!InventoryManager) return false;
     if (InventoryManager->IsInventoryFull()) return false;
 
-    FName ItemToReturn = EquippedItems[Slot];
-    InventoryManager->AddItemToInventory(ItemToReturn, 1);
-    EquippedItems.Remove(Slot);
+    FEquipmentSlotData* SlotData = GetSlotByEnum(Slot);
+    if (!SlotData || !SlotData->bIsOccupied) return false;
 
-    PushAccessoryBonusesToStats(); // Recalculate stats after any change
+    InventoryManager->AddItemToInventory(SlotData->ItemData.ItemRowName, 1);
+    SlotData->Clear();
+
+    PushStatBonuses();
     OnEquipmentChanged.Broadcast();
     return true;
 }
 
-bool UEquipmentManager::IsSlotOccupied(EEquipmentSlot Slot)
+// ----------------------------------------------------------------
+// IsSlotOccupied / GetSlotData
+// ----------------------------------------------------------------
+bool UEquipmentManager::IsSlotOccupied(EEquipmentSlot Slot) const
 {
-    return EquippedItems.Contains(Slot);
+    const FEquipmentSlotData* SlotData = GetSlotByEnum(Slot);
+    return SlotData ? SlotData->bIsOccupied : false;
 }
 
-FName UEquipmentManager::GetItemInSlot(EEquipmentSlot Slot)
+FEquipmentSlotData UEquipmentManager::GetSlotData(EEquipmentSlot Slot) const
 {
-    if (!IsSlotOccupied(Slot)) return NAME_None;
-    return EquippedItems[Slot];
+    const FEquipmentSlotData* SlotData = GetSlotByEnum(Slot);
+    return SlotData ? *SlotData : FEquipmentSlotData();
 }
 
-int32 UEquipmentManager::GetTotalArmourDefense()
+// ----------------------------------------------------------------
+// Stat helpers
+// ----------------------------------------------------------------
+int32 UEquipmentManager::GetTotalArmourDefense() const
 {
     if (!ArmourDataTable) return 0;
-    
+
     int32 Total = 0;
-    TArray<EEquipmentSlot> ArmourSlots = { EEquipmentSlot::Helmet, EEquipmentSlot::Chestplate, EEquipmentSlot::Leggings, EEquipmentSlot::Boots, EEquipmentSlot::Gloves
+    const TArray<EEquipmentSlot> ArmourSlots = {
+        EEquipmentSlot::Helmet, EEquipmentSlot::Chestplate,
+        EEquipmentSlot::Leggings, EEquipmentSlot::Boots, EEquipmentSlot::Gloves
     };
 
-    for (EEquipmentSlot Slot : ArmourSlots)
+    for (EEquipmentSlot SlotEnum : ArmourSlots)
     {
-        if (!IsSlotOccupied(Slot)) continue;
-        FArmourDataInfo* Data = ArmourDataTable->FindRow<FArmourDataInfo>(EquippedItems[Slot], TEXT(""));
+        const FEquipmentSlotData* Slot = GetSlotByEnum(SlotEnum);
+        if (!Slot || !Slot->bIsOccupied) continue;
+
+        const FArmourDataInfo* Data = ArmourDataTable->FindRow<FArmourDataInfo>(
+            Slot->ItemData.ItemRowName, TEXT(""));
         if (Data) Total += Data->ArmourDefense;
     }
     return Total;
 }
 
-float UEquipmentManager::GetEquippedWeaponAttackSpeed()
+float UEquipmentManager::GetEquippedWeaponAttackSpeed() const
 {
-    if (!WeaponDataTable || !IsSlotOccupied(EEquipmentSlot::MainHand)) return 1.0f;
+    if (!WeaponDataTable || !MainHandSlot.bIsOccupied) return 1.0f;
 
-    FWeaponDataInfo* Data = WeaponDataTable->FindRow<FWeaponDataInfo>(
-        EquippedItems[EEquipmentSlot::MainHand], TEXT(""));
-
+    const FWeaponDataInfo* Data = WeaponDataTable->FindRow<FWeaponDataInfo>(
+        MainHandSlot.ItemData.ItemRowName, TEXT(""));
     return Data ? Data->AttackSpeed : 1.0f;
 }
 
-EWeaponDataType UEquipmentManager::GetEquippedWeaponType()
+EWeaponDataType UEquipmentManager::GetEquippedWeaponType() const
 {
-    if (!WeaponDataTable || !IsSlotOccupied(EEquipmentSlot::MainHand))
+    if (!WeaponDataTable || !MainHandSlot.bIsOccupied)
         return EWeaponDataType::MiscWeapon;
 
-    FWeaponDataInfo* Data = WeaponDataTable->FindRow<FWeaponDataInfo>(
-        EquippedItems[EEquipmentSlot::MainHand], TEXT(""));
-
+    const FWeaponDataInfo* Data = WeaponDataTable->FindRow<FWeaponDataInfo>(
+        MainHandSlot.ItemData.ItemRowName, TEXT(""));
     return Data ? Data->WeaponType : EWeaponDataType::MiscWeapon;
 }
 
-
-EEquipmentSlot UEquipmentManager::GetSlotForItem(FName ItemRowName)
+// ----------------------------------------------------------------
+// PushStatBonuses — recalculates all equipment bonuses to StatsComp
+// ----------------------------------------------------------------
+void UEquipmentManager::PushStatBonuses()
 {
-    if (!ItemDataTable) return EEquipmentSlot::None;
-    FItemDataInfo* Data = ItemDataTable->FindRow<FItemDataInfo>(ItemRowName, TEXT(""));
-    if (!Data) return EEquipmentSlot::None;
-    return Data->SlotType;
-}
-
-void UEquipmentManager::PushAccessoryBonusesToStats()
-{
-    if (!StatsComp || !AccessoryDataTable || !ArmourDataTable) return;
+    if (!StatsComp) return;
 
     float TotalHP   = 0.f;
     float TotalStam = 0.f;
     float TotalMana = 0.f;
 
-    // Accessory slots
-    TArray<EEquipmentSlot> AccSlots = { EEquipmentSlot::Belt, EEquipmentSlot::HandAcc, EEquipmentSlot::HeadAcc, EEquipmentSlot::Charm
+    // Armour slots
+    const TArray<EEquipmentSlot> ArmourSlots = {
+        EEquipmentSlot::Helmet, EEquipmentSlot::Chestplate,
+        EEquipmentSlot::Leggings, EEquipmentSlot::Boots, EEquipmentSlot::Gloves
     };
-
-    for (EEquipmentSlot Slot : AccSlots)
+    for (EEquipmentSlot SlotEnum : ArmourSlots)
     {
-        if (!IsSlotOccupied(Slot)) continue;
-        FAccessoryItemData* Data = AccessoryDataTable->FindRow<FAccessoryItemData>( EquippedItems[Slot], TEXT(""));
+        const FEquipmentSlotData* Slot = GetSlotByEnum(SlotEnum);
+        if (!Slot || !Slot->bIsOccupied || !ArmourDataTable) continue;
+
+        const FArmourDataInfo* Data = ArmourDataTable->FindRow<FArmourDataInfo>(
+            Slot->ItemData.ItemRowName, TEXT(""));
         if (!Data) continue;
 
-        TotalHP += Data->BonusHealth;
+        TotalHP   += Data->BonusHealth;
         TotalStam += Data->BonusStamina;
-        TotalMana += Data->BonusMana; 
+        TotalMana += Data->BonusMana;
     }
 
-    TArray<EEquipmentSlot> ArmourSlots = {EEquipmentSlot::Helmet, EEquipmentSlot::Chestplate,EEquipmentSlot::Leggings, EEquipmentSlot::Boots,EEquipmentSlot::Gloves};
-
-    for (EEquipmentSlot Slot : ArmourSlots)
+    // Accessory slots
+    const TArray<EEquipmentSlot> AccSlots = {
+        EEquipmentSlot::Belt, EEquipmentSlot::HandAcc,
+        EEquipmentSlot::HeadAcc, EEquipmentSlot::Charm
+    };
+    for (EEquipmentSlot SlotEnum : AccSlots)
     {
-        if (!IsSlotOccupied(Slot)) continue;
-        FArmourDataInfo* Data = ArmourDataTable->FindRow<FArmourDataInfo>( EquippedItems[Slot], TEXT(""));
+        const FEquipmentSlotData* Slot = GetSlotByEnum(SlotEnum);
+        if (!Slot || !Slot->bIsOccupied || !AccessoryDataTable) continue;
+
+        const FAccessoryItemData* Data = AccessoryDataTable->FindRow<FAccessoryItemData>(
+            Slot->ItemData.ItemRowName, TEXT(""));
         if (!Data) continue;
 
-        TotalHP += Data->BonusHealth;
+        TotalHP   += Data->BonusHealth;
         TotalStam += Data->BonusStamina;
         TotalMana += Data->BonusMana;
     }

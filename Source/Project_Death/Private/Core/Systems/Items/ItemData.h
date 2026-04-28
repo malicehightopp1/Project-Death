@@ -41,6 +41,7 @@ enum class EEquipmentSlot : uint8
 	HeadAcc     UMETA(DisplayName = "Head Accessory"),
 	Charm       UMETA(DisplayName = "Charm")
 };
+
 USTRUCT(BlueprintType)
 struct FItemDataInfo : public FTableRowBase
 {
@@ -64,6 +65,8 @@ struct FItemDataInfo : public FTableRowBase
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) EItemType ItemType;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) ERarityType ItemRarity;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) EEquipmentSlot SlotType;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName ItemRowName;
 
 	//Item dropping information
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) UStaticMesh* ItemMesh;
@@ -72,7 +75,23 @@ struct FItemDataInfo : public FTableRowBase
 // ========================================================================================================
 // ------ Weapon Item Data --------------------------------------------------------------------------------
 // ========================================================================================================
+USTRUCT(BlueprintType)
+struct FEquipmentSlotData
+{
+	GENERATED_BODY()
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Equipment")
+	FItemDataInfo ItemData;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Equipment")
+	bool bIsOccupied = false;
+
+	void Clear()
+	{
+		ItemData  = FItemDataInfo();
+		bIsOccupied = false;
+	}
+};
 UENUM(BlueprintType)
 enum class EWeaponDataType : uint8
 {
