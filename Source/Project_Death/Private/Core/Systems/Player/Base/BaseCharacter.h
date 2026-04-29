@@ -40,16 +40,13 @@ public:
 	/// References -----------------------------------------------------------------------------------------------------
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Equipment") class UEquipmentManager* EquipmentManager;
-	UPROPERTY(EditDefaultsOnly, Category = "Player | Ref") UInventoryManager* InventoryManagerRef;
-	
+	UPROPERTY(EditDefaultsOnly, Category = "Player | Ref") UInventoryManager* InventoryManagerRef;	
 	UPROPERTY(BlueprintReadOnly) bool bIsAttacking = false;
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// Ui ------------------------------------------------------------------------------------------------------------
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	UPROPERTY() UUserWidget* PlayerWidget;
 	UPROPERTY(EditDefaultsOnly, Category = "Player | UI") TSubclassOf<UPlayerWidget> PlayerWidgetClass;
-	
-	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// Dodge ----------------------------------------------------------------------------------------------------------
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

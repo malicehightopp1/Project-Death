@@ -8,6 +8,7 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Components/WidgetComponent.h"
 #include "Core/Systems/Enemies/Enemy Stats/EnemyBaseStatsComp.h"
 #include "Core/Systems/Interactions/InteractionManager.h"
 #include "Core/Systems/Player/Inventory/InventoryManager.h"
@@ -176,9 +177,9 @@ void ABaseCharacter::Attack(const FInputActionValue& Value)
 	if (bIsAttacking) return;
 	if (UCharacterStatsComp* PlayerStats = FindComponentByClass<UCharacterStatsComp>())
 	{
-		if (PlayerStats->CurrentStamina > 29)
+		if (PlayerStats->CurrentStamina > 14)
 		{
-			PlayerStats->OnStaminaChange(30);
+			PlayerStats->OnStaminaChange(15);
 			UAnimInstance* animInstance = GetMesh()->GetAnimInstance();
 			if (!animInstance || !AttackMontage) return;
 			
@@ -196,7 +197,6 @@ void ABaseCharacter::PerformSphereAttack()
 	FVector Origin = GetActorLocation() + (GetActorForwardVector() * AttackRange); //geting what is infront of the player
 	FCollisionQueryParams CollisionQueryParams;
 	CollisionQueryParams.AddIgnoredActor(this); //so i dont hit myself
-	
 	
 	//setting up the overlap sphere
 	TArray<FOverlapResult> HitResults;
@@ -228,7 +228,6 @@ void ABaseCharacter::PerformSphereAttack()
 			UE_LOG(LogTemp, Display, TEXT("Damage given: %f"), FinalDamage) 
 		}
 	}
-	DrawDebugSphere(GetWorld(), Origin, AttackRadius, 16, FColor::Red, false, 1.f);
 }
 
 void ABaseCharacter::OnAttackEnd() //call at end
