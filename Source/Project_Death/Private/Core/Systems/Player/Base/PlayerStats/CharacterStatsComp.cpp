@@ -209,8 +209,8 @@ void UCharacterStatsComp::OnHealthChange(float mHealthAddAmount)
 	}
 	else
 	{
-		StartHitStun(); // only stun if still alive
 		OnHitReact.Broadcast();
+		StartHitStun(); // only stun if still alive
 	}
 	OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);
 }

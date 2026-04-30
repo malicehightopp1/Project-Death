@@ -18,22 +18,10 @@ UPlayerWidget::UPlayerWidget(const FObjectInitializer& ObjectInitializer) : Supe
 void UPlayerWidget::NativeConstruct() //Begin play
 {
 	Super::NativeConstruct();
-	UE_LOG(LogTemp, Warning, TEXT("BeginPlay"));
-	if (PlayerCursorImage) // setting the padding for 
-	{
-		if (UVerticalBoxSlot* ImageSlot = Cast<UVerticalBoxSlot>(PlayerCursorImage->Slot))
-		{
-			FMargin NewPadding(10, 10, 10, 10);
-			UE_LOG(LogTemp, Warning, TEXT("Set new padding"));
-			ImageSlot->SetPadding(NewPadding);
-		}
-	}
-	
 	FTimerHandle TimerHandle;
 	GetWorld()->GetTimerManager().SetTimer(TimerHandle, [this]()
 	{
 		APawn* Pawn = GetOwningPlayerPawn();
-		UE_LOG(LogTemp, Warning, TEXT("Pawn: %s"), Pawn ? *Pawn->GetName() : TEXT("NULL"));
 		if (!Pawn) return;
 
 		UCharacterStatsComp* StatsComp = Pawn->FindComponentByClass<UCharacterStatsComp>();

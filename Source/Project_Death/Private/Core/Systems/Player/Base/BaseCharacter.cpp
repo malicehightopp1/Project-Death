@@ -14,6 +14,7 @@
 #include "Core/Systems/Player/PlayerUI/PlayerWidget.h"
 #include "Engine/OverlapResult.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "PlayerStats/CharacterStatsComp.h"
 
 // Sets default values
@@ -206,22 +207,33 @@ void ABaseCharacter::OnSprintChanged(bool bSprinting)
 #pragma region Attack
 void ABaseCharacter::Attack(const FInputActionValue& Value)
 {
-	if (InventoryManagerRef && InventoryManagerRef->bIsInventoryOpen) return;//dont allow when inventory open
-	if (bIsAttacking) return;
+	if (InventoryManagerRef && InventoryManagerRef->bIsInventoryOpen) return;
 	if (CharacterStats->bIsStunned) return;
 	if (CharacterStats->bIsPlayerDead) return;
-	
+
+	// If mid attack, queue the next one instead of ignoring input
+	if (bIsAttacking)
+	{
+		bComboQueued = true;
+		return;
+	}
+
 	if (UCharacterStatsComp* PlayerStats = FindComponentByClass<UCharacterStatsComp>())
 	{
-		if (PlayerStats->CurrentStamina > 14)
+		if (PlayerStats->CurrentStamina > 9)
 		{
-			PlayerStats->OnStaminaChange(15);
-			UAnimInstance* animInstance = GetMesh()->GetAnimInstance();
-			if (!animInstance || !AttackMontage) return;
-			
+			PlayerStats->OnStaminaChange(10);
+
+			UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+			if (!AnimInstance) return;
+
+			if (ComboMontages.IsEmpty()) return;
+			UAnimMontage* MontageToPlay = ComboMontages[ComboCount % ComboMontages.Num()];
+			if (!MontageToPlay) return;
+
 			bIsAttacking = true;
 			LockRotation(true);
-			animInstance->Montage_Play(AttackMontage);
+			AnimInstance->Montage_Play(MontageToPlay);
 		}
 	}
 }
@@ -265,13 +277,39 @@ void ABaseCharacter::PerformSphereAttack()
 			UE_LOG(LogTemp, Display, TEXT("Damage given: %f"), FinalDamage) 
 		}
 	}
+	
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		PC->ClientStartCameraShake(HitCameraShake);
+	}
 }
 
 void ABaseCharacter::OnAttackEnd() //call at end
 {
-	bIsAttacking = false;
 	HitActorsThisSwing.Empty();
 	LockRotation(false);
+
+	if (bComboQueued)
+	{
+		bComboQueued = false;
+		bIsAttacking = false;
+
+		if (ComboCount >= ComboMontages.Num() - 1)
+		{
+			ComboCount = 0;
+		}
+		else
+		{
+			ComboCount++;
+		}
+
+		Attack(FInputActionValue());
+	}
+	else
+	{
+		bIsAttacking = false;
+		ComboCount = 0;
+	}
 }
 
 void ABaseCharacter::OnAttackHitFrame() //call when the attack hits

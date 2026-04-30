@@ -19,9 +19,6 @@ protected:
 	//Base for UI *HOLDERS*
 	UPROPERTY(EditAnywhere, meta = (BindWidget)) class UCanvasPanel* CanvasPanel;
 	
-	//Player cursor
-	UPROPERTY(EditAnywhere, meta = (BindWidget)) class UImage* PlayerCursorImage;
-	
 	//PlayerLevel 
 	UPROPERTY(EditAnywhere, meta = (BindWidget)) class UTextBlock* PlayerCurrentLevel;
 	UPROPERTY(EditAnywhere, meta = (BindWidget)) class UTextBlock* PlayerXp;

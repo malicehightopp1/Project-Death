@@ -100,15 +100,18 @@ private:
 	UFUNCTION() void LockRotation(bool bLock);
 	UPROPERTY(EditDefaultsOnly, Category = "Player | PlayerAttack") float AttackRadius = 80.0f;
 	UPROPERTY(EditDefaultsOnly, Category = "Player | PlayerAttack") float AttackDamage = 20.0f;
-	UPROPERTY(EditDefaultsOnly, Category = "Player | PlayerAttack") float AttackRange = 150.0f;
+	UPROPERTY(EditDefaultsOnly, Category = "Player | PlayerAttack") float AttackRange = 70.0f;
 
 	TArray<TWeakObjectPtr<AActor>> HitActorsThisSwing;  //TWeakObjectPtr so it doesnt crash 
 	
-	UPROPERTY(EditAnywhere, Category = "Player | PlayerAttack") UAnimMontage* AttackMontage;
-
 	UPROPERTY(EditAnywhere, Category = "Player | PlayerTakeDamage")UAnimMontage* HitReactMontage;
 
 	UFUNCTION()void PlayHitReact();
+	UPROPERTY(EditAnywhere, Category = "Combat") TSubclassOf<UCameraShakeBase> HitCameraShake;
+
+	UPROPERTY(EditAnywhere, Category = "Combat") TArray<UAnimMontage*> ComboMontages;
+	UPROPERTY() int32 ComboCount = 0;
+	UPROPERTY() bool bComboQueued = false;
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// interaction ----------------------------------------------------------------------------------------------------
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
