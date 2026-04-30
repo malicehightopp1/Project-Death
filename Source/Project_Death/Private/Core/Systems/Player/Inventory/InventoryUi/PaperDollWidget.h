@@ -2,6 +2,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "Core/Systems/Player/Inventory/EquipmentManager.h"
 #include "PaperDollWidget.generated.h"
 
 class UEquipmentManager;
@@ -13,14 +14,13 @@ class UPaperDollWidget : public UUserWidget
     GENERATED_BODY()
 
 public:
-    /** Call this once from the owning HUD/character after the widget is created. */
-    UFUNCTION(BlueprintCallable, Category = "PaperDoll")
-    void InitializePaperDoll(UEquipmentManager* InEquipmentManager,
-                             UInventoryManager* InInventoryManager);
+    UFUNCTION(BlueprintCallable, Category = "PaperDoll")void InitializePaperDoll(UEquipmentManager* InEquipmentManager, UInventoryManager* InInventoryManager);
+    
+    UFUNCTION(BlueprintCallable, Category = "PaperDoll") void RefreshAllSlots();
 
-    /** Exposed so the refreshSlots Blueprint function can call it. */
-    UFUNCTION(BlueprintCallable, Category = "PaperDoll")
-    void RefreshAllSlots();
+    UFUNCTION(BlueprintCallable, Category = "PaperDoll") void RefreshStatbonus();
+
+    UFUNCTION(BlueprintImplementableEvent, Category = "PaperDoll") void UpdateStatbonus(const FEquipmentStatSummary& stats);
 
 protected:
     virtual void NativeConstruct() override;

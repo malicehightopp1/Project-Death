@@ -18,6 +18,15 @@ public:
 	// Sets default values for this component's properties
 	UEnemyBaseStatsComp();
 
+	UPROPERTY(EditAnywhere, Category = "Combat") UAnimMontage* hitreactMontage;
+
+	UPROPERTY(EditAnywhere, Category = "Combat") float HitStunDuration = 0.5f;
+
+	UPROPERTY() FTimerHandle HitStunTimerHandle;
+	UFUNCTION() void StartHitStun();
+	UFUNCTION() void EndHitStun();
+	UFUNCTION() void PlayHitreact();
+
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;

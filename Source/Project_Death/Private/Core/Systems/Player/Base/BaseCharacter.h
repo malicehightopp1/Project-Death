@@ -105,4 +105,9 @@ private:
 	TArray<TWeakObjectPtr<AActor>> HitActorsThisSwing;  //TWeakObjectPtr so it doesnt crash 
 	
 	UPROPERTY(EditAnywhere, Category = "Player | PlayerAttack") UAnimMontage* AttackMontage;
+	
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/// interaction ----------------------------------------------------------------------------------------------------
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	UPROPERTY(EditAnywhere, Category = "Player | Interaction") float InteractionRange = 150.f;
 };

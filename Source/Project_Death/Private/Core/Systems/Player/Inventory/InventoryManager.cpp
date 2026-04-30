@@ -3,10 +3,12 @@
 
 #include "InventoryManager.h"
 
+#include "EquipmentManager.h"
 #include "Blueprint/UserWidget.h"
 #include "Core/Systems/Items/ItemData.h"
 #include "Core/Systems/Items/ItemPickup.h"
 #include "InventoryUi/PaperDollWidget.h"
+#include "Kismet/GameplayStatics.h"
 
 class UPaperDollWidget;
 
@@ -114,19 +116,17 @@ void UInventoryManager::DropItem(FName ItemRowName, int32 Quantity, FVector Spaw
 	FActorSpawnParameters SpawnParams;
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
-	FRotator SpawnRotation = FRotator::ZeroRotator;
-
-	AItemPickup* DroppedItem = GetWorld()->SpawnActor<AItemPickup>(ItemPickupClass,
-	Spawnlocation,
-	SpawnRotation,
-	SpawnParams);
+	AItemPickup* DroppedItem = GetWorld()->SpawnActorDeferred<AItemPickup>(
+		ItemPickupClass,
+		FTransform(FRotator::ZeroRotator, Spawnlocation),
+		nullptr, nullptr,
+		ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn
+	);
 
 	if (DroppedItem)
 	{
-		DroppedItem->ItemRowHandle.DataTable = ItemDataTable;
-		DroppedItem->ItemRowHandle.RowName = ItemRowName;
-		DroppedItem->ItemQuantity = Quantity;
-		DroppedItem->LoaditemData();
+		DroppedItem->InitializeItem(ItemDataTable, ItemRowName, Quantity);
+		UGameplayStatics::FinishSpawningActor(DroppedItem, FTransform(FRotator::ZeroRotator, Spawnlocation));
 	}
 }
 
@@ -215,13 +215,15 @@ void UInventoryManager::Inventory() //for turning on and off the UI
 		if (InventoryWidgetInstance && bIsInventoryOpen == false)
 		{
 			InventoryWidgetInstance->AddToViewport();
-
+			
 			bIsInventoryOpen = true;
 			PC->SetShowMouseCursor(true);
 			PC->SetIgnoreLookInput(true);
-			PC->SetIgnoreMoveInput(true);
-
+			PC->SetIgnoreMoveInput(true); 
+			
 			FInputModeGameAndUI InputMode;
+			InputMode.SetHideCursorDuringCapture(false);
+			InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
 			PC->SetInputMode(InputMode);
 		}
 	}

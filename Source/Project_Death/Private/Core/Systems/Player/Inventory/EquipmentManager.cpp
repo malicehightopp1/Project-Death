@@ -146,6 +146,59 @@ EWeaponDataType UEquipmentManager::GetEquippedWeaponType() const
     return Data ? Data->WeaponType : EWeaponDataType::MiscWeapon;
 }
 
+FEquipmentStatSummary UEquipmentManager::GetTotalStatBonuses() const
+{
+    FEquipmentStatSummary Summary;
+
+    // Armour slots
+    const TArray<EEquipmentSlot> ArmourSlots = {
+        EEquipmentSlot::Helmet, EEquipmentSlot::Chestplate,
+        EEquipmentSlot::Leggings, EEquipmentSlot::Boots, EEquipmentSlot::Gloves
+    };
+    for (EEquipmentSlot SlotEnum : ArmourSlots)
+    {
+        const FEquipmentSlotData* Slot = GetSlotByEnum(SlotEnum);
+        if (!Slot || !Slot->bIsOccupied || !ArmourDataTable) continue;
+
+        const FArmourDataInfo* Data = ArmourDataTable->FindRow<FArmourDataInfo>(
+            Slot->ItemData.ItemRowName, TEXT(""));
+        if (!Data) continue;
+
+        Summary.BonusHealth  += Data->BonusHealth;
+        Summary.BonusStamina += Data->BonusStamina;
+        Summary.BonusMana    += Data->BonusMana;
+    }
+
+    // Accessory slots
+    const TArray<EEquipmentSlot> AccSlots = {
+        EEquipmentSlot::Belt, EEquipmentSlot::HandAcc,
+        EEquipmentSlot::HeadAcc, EEquipmentSlot::Charm
+    };
+    for (EEquipmentSlot SlotEnum : AccSlots)
+    {
+        const FEquipmentSlotData* Slot = GetSlotByEnum(SlotEnum);
+        if (!Slot || !Slot->bIsOccupied || !AccessoryDataTable) continue;
+
+        const FAccessoryItemData* Data = AccessoryDataTable->FindRow<FAccessoryItemData>(
+            Slot->ItemData.ItemRowName, TEXT(""));
+        if (!Data) continue;
+
+        Summary.BonusHealth  += Data->BonusHealth;
+        Summary.BonusStamina += Data->BonusStamina;
+        Summary.BonusMana += Data->BonusMana;
+    }
+
+    // Weapon
+    if (MainHandSlot.bIsOccupied && WeaponDataTable)
+    {
+        const FWeaponDataInfo* Data = WeaponDataTable->FindRow<FWeaponDataInfo>(
+            MainHandSlot.ItemData.ItemRowName, TEXT(""));
+        if (Data) Summary.BonusDamage += Data->BaseDamage;
+    }
+
+    return Summary;
+}
+
 void UEquipmentManager::PushStatBonuses()
 {
     if (!StatsComp) return;

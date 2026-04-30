@@ -109,19 +109,31 @@ void ABaseCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 #pragma region interactions
 void ABaseCharacter::Interact(const FInputActionValue& Value) //setting the definition for interaction *TODO Add a ui that pops up over items the player walks up to*
 {
-	FHitResult* Hit = new FHitResult();
-	FVector start = PlayerCameraComponent->GetComponentLocation();
-	FVector end = start + (PlayerCameraComponent->GetForwardVector() *1000);
-
 	UE_LOG(LogTemp, Display, TEXT("Interact called"));
-	UKismetSystemLibrary::SphereTraceSingle(this, start, end, 5.0f, UEngineTypes::ConvertToTraceType(ECC_Visibility), //Persistent for testing purposes
-		false, TArray<AActor*>(), EDrawDebugTrace::None, *Hit, true);
-	
-	if (Hit->GetActor() != nullptr)
+
+	// Find all actors overlapping a sphere around the player
+	TArray<FOverlapResult> OverlapResults;
+	FCollisionQueryParams Params;
+	Params.AddIgnoredActor(this);
+
+	GetWorld()->OverlapMultiByChannel(
+		OverlapResults,
+		GetActorLocation(),
+		FQuat::Identity,
+		ECC_Pawn,
+		FCollisionShape::MakeSphere(InteractionRange), // add "float InteractRadius = 150.f" to your header
+		Params
+	);
+
+	for (const FOverlapResult& Result : OverlapResults)
 	{
-		if (Hit->GetActor()->GetClass()->ImplementsInterface(UInteractInterface::StaticClass())) //if the actor that was hit has a interface
+		AActor* HitActor = Result.GetActor();
+		if (!HitActor) continue;
+
+		if (HitActor->GetClass()->ImplementsInterface(UInteractInterface::StaticClass()))
 		{
-			Cast<IInteractInterface>(Hit->GetActor())->InteractPure(this);
+			Cast<IInteractInterface>(HitActor)->InteractPure(this);
+			return; 
 		}
 	}
 }
@@ -139,6 +151,7 @@ void ABaseCharacter::InventoryToggle(const FInputActionValue& Value) //toggling 
 #pragma region Dodging
 void ABaseCharacter::PlayerDodge() //dodge for player
 {
+	if (InventoryManagerRef && InventoryManagerRef->bIsInventoryOpen) return; //dont allow when inventory open
 	if (bIsDodging) return; //don't allow player to dodge if already dodging
 
 	bIsDodging = true;
@@ -174,6 +187,7 @@ void ABaseCharacter::OnSprintChanged(bool bSprinting)
 #pragma region Attack
 void ABaseCharacter::Attack(const FInputActionValue& Value)
 {
+	if (InventoryManagerRef && InventoryManagerRef->bIsInventoryOpen) return;//dont allow when inventory open
 	if (bIsAttacking) return;
 	if (UCharacterStatsComp* PlayerStats = FindComponentByClass<UCharacterStatsComp>())
 	{

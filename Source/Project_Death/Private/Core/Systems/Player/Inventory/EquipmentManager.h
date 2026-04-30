@@ -10,6 +10,16 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEquipmentChanged);
 class UInventoryManager;
 class UCharacterStatsComp;
 
+USTRUCT(BlueprintType)
+struct FEquipmentStatSummary
+{
+    GENERATED_BODY()
+
+    UPROPERTY(BlueprintReadOnly) float BonusHealth   = 0.f;
+    UPROPERTY(BlueprintReadOnly) float BonusStamina  = 0.f;
+    UPROPERTY(BlueprintReadOnly) float BonusMana     = 0.f;
+    UPROPERTY(BlueprintReadOnly) float BonusDamage   = 0.f;
+};
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class UEquipmentManager : public UActorComponent
 {
@@ -72,6 +82,7 @@ public:
 
     UFUNCTION(BlueprintCallable, Category = "Equipment|Stats")EWeaponDataType GetEquippedWeaponType() const;
 
+    UFUNCTION(BlueprintCallable, Category = "Equipment") FEquipmentStatSummary GetTotalStatBonuses() const;
 protected:
     virtual void BeginPlay() override;
 

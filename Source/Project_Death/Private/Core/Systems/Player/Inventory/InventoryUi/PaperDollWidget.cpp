@@ -5,6 +5,33 @@
 void UPaperDollWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
+	// Grab the player and pull components directly — no need for external InitializePaperDoll call
+	APlayerController* PC = GetOwningPlayer();
+	if (!PC) 
+	{
+		UE_LOG(LogTemp, Warning, TEXT("PaperDollWidget: No owning PlayerController"));
+		return;
+	}
+
+	APawn* Pawn = PC->GetPawn();
+	if (!Pawn)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("PaperDollWidget: No pawn found"));
+		return;
+	}
+
+	EquipmentManager = Pawn->FindComponentByClass<UEquipmentManager>();
+	InventoryManager = Pawn->FindComponentByClass<UInventoryManager>();
+
+	UE_LOG(LogTemp, Warning, TEXT("PaperDollWidget: EqManager=%s InvManager=%s"),
+		EquipmentManager ? TEXT("FOUND") : TEXT("NULL"),
+		InventoryManager ? TEXT("FOUND") : TEXT("NULL"));
+
+	if (!EquipmentManager) return;
+
+	EquipmentManager->OnEquipmentChanged.AddDynamic(this, &UPaperDollWidget::OnEquipmentChanged);
+
+	RefreshAllSlots();
 }
 
 void UPaperDollWidget::NativeDestruct()
@@ -38,11 +65,21 @@ void UPaperDollWidget::OnEquipmentChanged()
 
 void UPaperDollWidget::RefreshAllSlots()
 {
-	// Intentionally left minimal — the heavy lifting is in
-	// the Blueprint refreshSlots function which reads the named
-	// slot properties (HeadSlot, ChestSlot, etc.) directly and
-	// calls PopulateSpot on each widget. This function exists
-	// so Blueprint can call it and so the delegate can trigger it.
-	//
-	// If you move refreshSlots to C++ later, implement it here.
+	RefreshStatbonus();
+}
+
+void UPaperDollWidget::RefreshStatbonus()
+{
+	if (!EquipmentManager)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("PaperDollWidget: EquipmentManager is NULL — was InitializePaperDoll called?"));
+		return;
+	}
+
+	FEquipmentStatSummary Stats = EquipmentManager->GetTotalStatBonuses();
+
+	UE_LOG(LogTemp, Display, TEXT("PaperDollWidget: HP=%.1f SP=%.1f MP=%.1f DMG=%.1f"),
+		Stats.BonusHealth, Stats.BonusStamina, Stats.BonusMana, Stats.BonusDamage);
+
+	UpdateStatbonus(Stats);
 }

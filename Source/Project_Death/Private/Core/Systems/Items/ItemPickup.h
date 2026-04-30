@@ -1,44 +1,76 @@
-// Brandin stanfield
-
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Core/Systems/Interactions/InteractionManager.h"
-#include "Core/Systems/Items/ItemData.h"
-#include "Core/Systems/Player/Base/BaseCharacter.h"
+#include "ItemData.h"
 #include "GameFramework/Actor.h"
+#include "Core/Systems/Interactions/InteractionManager.h"
 #include "ItemPickup.generated.h"
 
-struct FItemDataInfo;
+class USphereComponent;
+class UWidgetComponent;
+class ABaseCharacter;
 
 UCLASS()
 class AItemPickup : public AActor, public IInteractInterface
 {
-	GENERATED_BODY()
-	
-public:	
-	// Sets default values for this actor's properties
-	AItemPickup();
+    GENERATED_BODY()
+
+public:
+    AItemPickup();
+    void InitializeItem(UDataTable* DataTable, FName RowName, int32 InQuantity);
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+    virtual void BeginPlay() override;
 
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ItemPickup") FDataTableRowHandle ItemRowHandle;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ItemPickup | Components") UStaticMeshComponent* ItemMeshComp;
+    // --- Components ---
+    UPROPERTY(VisibleAnywhere, Category = "Components")
+    UStaticMeshComponent* ItemMeshComp;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning") int32 ItemQuantity = 1;
+    // Proximity detection sphere
+    UPROPERTY(VisibleAnywhere, Category = "Components")
+    USphereComponent* ProximitySphere;
 
-	FItemDataInfo ItemInfo; //for caching the data
-	
-	virtual void InteractPure(ABaseCharacter* player) override;
-	virtual FText GetInteractText_Implementation() override;
+    // World-space interaction prompt widget
+    UPROPERTY(VisibleAnywhere, Category = "Components")
+    UWidgetComponent* InteractWidgetComp;
 
-	void LoaditemData();
-	
+    // --- Data ---
+    UPROPERTY(EditAnywhere, Category = "Item")
+    FDataTableRowHandle ItemRowHandle;
+
+    UPROPERTY(EditAnywhere, Category = "Item")
+    int32 ItemQuantity = 1;
+
+    UPROPERTY(BlueprintReadOnly, Category = "Item")
+    FItemDataInfo ItemInfo;
+
+    // The widget class to spawn (make a UUserWidget BP for this)
+    UPROPERTY(EditAnywhere, Category = "UI")
+    TSubclassOf<UUserWidget> InteractWidgetClass;
+
+    UPROPERTY(EditAnywhere, Category = "Proximity")
+    float ProximityRadius = 50.f;
+
+    // Tracks if a player is currently in range
+    UPROPERTY()
+    ABaseCharacter* PlayerInRange = nullptr;
+
+    // --- Overlap Callbacks ---
+    UFUNCTION()
+    void OnProximityBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+        UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+        bool bFromSweep, const FHitResult& SweepResult);
+
+    UFUNCTION()
+    void OnProximityEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
+        UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+    // --- IInteractInterface ---
+    virtual void InteractPure(ABaseCharacter* Player) override;
+    virtual FText GetInteractText_Implementation() override;
+
+    // --- Helpers ---
+    void LoadItemData();
+    void ShowInteractPrompt(bool bShow);
+    
 };
