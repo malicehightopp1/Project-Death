@@ -47,33 +47,49 @@ struct FItemDataInfo : public FTableRowBase
 {
 	GENERATED_BODY()
 	
-	//Base information
+	// ========================================================================================================
+	// ------ item base information ---------------------------------------------------------------------------
+	// ========================================================================================================
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) FName ItemName;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) FText ItemDescription;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) int32 ItemId;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) UTexture2D* ItemTexture;
 
-	//Shop information
+	// ========================================================================================================
+	// ------ Shop information --------------------------------------------------------------------------------
+	// ========================================================================================================
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) int32 BuyPrice;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) int32 SellPrice;
 
-	//Stacking information
+	// ========================================================================================================
+	// ------ Stacking information ----------------------------------------------------------------------------
+	// ========================================================================================================
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) bool bIsStackable;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) int32 StackSize;
 
-	//type information
+	// ========================================================================================================
+	// ------ Type information --------------------------------------------------------------------------------
+	// ========================================================================================================
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) EItemType ItemType;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) ERarityType ItemRarity;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) EEquipmentSlot SlotType;
-	
+
+	// ========================================================================================================
+	// ------ Equipment lookup information --------------------------------------------------------------------
+	// ========================================================================================================
 	UPROPERTY(EditAnywhere, BlueprintReadWrite) FName ItemRowName;
 
-	//Item dropping information
+	// ========================================================================================================
+	// ------ Item dropping information -----------------------------------------------------------------------
+	// ========================================================================================================
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = ItemDataInfo) UStaticMesh* ItemMesh;
 };
 
 // ========================================================================================================
-// ------ Weapon Item Data --------------------------------------------------------------------------------
+// ------ Equipment Data ----------------------------------------------------------------------------------
 // ========================================================================================================
 USTRUCT(BlueprintType)
 struct FEquipmentSlotData
@@ -92,6 +108,9 @@ struct FEquipmentSlotData
 		bIsOccupied = false;
 	}
 };
+// ========================================================================================================
+// ------ Weapon Item Data --------------------------------------------------------------------------------
+// ========================================================================================================
 UENUM(BlueprintType)
 enum class EWeaponDataType : uint8
 {

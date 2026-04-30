@@ -17,6 +17,5 @@ class IInteractInterface //included with an interface
 	
 public:
 	UFUNCTION() virtual void InteractPure(ABaseCharacter* player) = 0; //C++ only function
-	UFUNCTION(blueprintNativeEvent, BlueprintCallable) FText GetInteractText();
 };
 

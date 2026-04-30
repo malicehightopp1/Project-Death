@@ -132,6 +132,7 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Character Stats | CharacterHealth") float MaxHealth = 0;
 	UPROPERTY(BlueprintReadOnly, Category = "Character Stats | CharacterHealth") bool bIsPlayerDead = false;
 	UPROPERTY(BlueprintReadOnly, Category = "Character Stats | CharacterHealth") bool bIsInvinciable = false;
+	UPROPERTY(EditAnywhere, Category = "Animation")UAnimMontage* DeathMontage;
 
 	//Health Delegates 
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Character Stats | CharacterHealth") FOnHealthChanged OnHealthChanged;
@@ -190,6 +191,7 @@ public:
 
 	UPROPERTY(BlueprintAssignable, Category = "Combat")FOnHitReact OnHitReact;
 	UPROPERTY() FTimerHandle HitStunTimerHandle;
+	UPROPERTY(BlueprintReadWrite) bool bIsStunned = false;
 
 	UFUNCTION() void StartHitStun();
 	UFUNCTION() void EndHitStun();

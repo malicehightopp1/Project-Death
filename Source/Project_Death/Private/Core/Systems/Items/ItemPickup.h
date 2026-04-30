@@ -17,59 +17,52 @@ class AItemPickup : public AActor, public IInteractInterface
 
 public:
     AItemPickup();
+    // ========================================================================================================
+    // ------ initlization function ---------------------------------------------------------------------------
+    // ========================================================================================================
     void InitializeItem(UDataTable* DataTable, FName RowName, int32 InQuantity);
 
 protected:
     virtual void BeginPlay() override;
 
-    // --- Components ---
-    UPROPERTY(VisibleAnywhere, Category = "Components")
-    UStaticMeshComponent* ItemMeshComp;
+    // ========================================================================================================
+    // ------ basic information --------------------------------------------------------------------------------
+    // ========================================================================================================
+    UPROPERTY(VisibleAnywhere, Category = "Components") UStaticMeshComponent* ItemMeshComp;
+    UPROPERTY(EditAnywhere, Category = "Item") int32 ItemQuantity = 1;
+    UPROPERTY(BlueprintReadOnly, Category = "Item") FItemDataInfo ItemInfo;
 
-    // Proximity detection sphere
-    UPROPERTY(VisibleAnywhere, Category = "Components")
-    USphereComponent* ProximitySphere;
 
-    // World-space interaction prompt widget
-    UPROPERTY(VisibleAnywhere, Category = "Components")
-    UWidgetComponent* InteractWidgetComp;
+    // ========================================================================================================
+    // ------ Item Pickup UI ----------------------------------------------------------------------------------
+    // ========================================================================================================
+    UPROPERTY(VisibleAnywhere, Category = "Components") UWidgetComponent* InteractWidgetComp;
+    UPROPERTY(EditAnywhere, Category = "UI") TSubclassOf<UUserWidget> InteractWidgetClass;
+    UPROPERTY(EditAnywhere, Category = "Item") FDataTableRowHandle ItemRowHandle;
+    
+    // ========================================================================================================
+    // ------ Item pickup variables ---------------------------------------------------------------------------
+    // ========================================================================================================
+    UPROPERTY(VisibleAnywhere, Category = "Components") USphereComponent* ProximitySphere;
+    UPROPERTY(EditAnywhere, Category = "Proximity") float ProximityRadius = 50.f;
+    UPROPERTY() ABaseCharacter* PlayerInRange = nullptr;
 
-    // --- Data ---
-    UPROPERTY(EditAnywhere, Category = "Item")
-    FDataTableRowHandle ItemRowHandle;
+    // ========================================================================================================
+    // ------ Overlap management --------------------------------------------------------------------------------
+    // ========================================================================================================
+    UFUNCTION()void OnProximityBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,bool bFromSweep, const FHitResult& SweepResult);
 
-    UPROPERTY(EditAnywhere, Category = "Item")
-    int32 ItemQuantity = 1;
+    UFUNCTION()void OnProximityEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-    UPROPERTY(BlueprintReadOnly, Category = "Item")
-    FItemDataInfo ItemInfo;
-
-    // The widget class to spawn (make a UUserWidget BP for this)
-    UPROPERTY(EditAnywhere, Category = "UI")
-    TSubclassOf<UUserWidget> InteractWidgetClass;
-
-    UPROPERTY(EditAnywhere, Category = "Proximity")
-    float ProximityRadius = 50.f;
-
-    // Tracks if a player is currently in range
-    UPROPERTY()
-    ABaseCharacter* PlayerInRange = nullptr;
-
-    // --- Overlap Callbacks ---
-    UFUNCTION()
-    void OnProximityBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
-        UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
-        bool bFromSweep, const FHitResult& SweepResult);
-
-    UFUNCTION()
-    void OnProximityEndOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor,
-        UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-
-    // --- IInteractInterface ---
+    // ========================================================================================================
+    // ------ Interface interaction----------------------------------------------------------------------------
+    // ========================================================================================================
     virtual void InteractPure(ABaseCharacter* Player) override;
-    virtual FText GetInteractText_Implementation() override;
+    virtual FText GetInteractText_Implementation();
 
-    // --- Helpers ---
+    // ========================================================================================================
+    // ------ helping functions -------------------------------------------------------------------------------
+    // ========================================================================================================
     void LoadItemData();
     void ShowInteractPrompt(bool bShow);
     

@@ -64,7 +64,7 @@ ABaseCharacter::ABaseCharacter()
 void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	if (PlayerWidgetClass) // was checking PlayerWidget instance not the class
 	{
 		PlayerWidget = CreateWidget<UPlayerWidget>(GetWorld(), PlayerWidgetClass);
@@ -208,6 +208,9 @@ void ABaseCharacter::Attack(const FInputActionValue& Value)
 {
 	if (InventoryManagerRef && InventoryManagerRef->bIsInventoryOpen) return;//dont allow when inventory open
 	if (bIsAttacking) return;
+	if (CharacterStats->bIsStunned) return;
+	if (CharacterStats->bIsPlayerDead) return;
+	
 	if (UCharacterStatsComp* PlayerStats = FindComponentByClass<UCharacterStatsComp>())
 	{
 		if (PlayerStats->CurrentStamina > 14)
@@ -257,6 +260,7 @@ void ABaseCharacter::PerformSphereAttack()
 		UEnemyBaseStatsComp* Enemystats = HitActor->FindComponentByClass<UEnemyBaseStatsComp>();
 		if (Enemystats)
 		{
+			if (Enemystats->bIsEnemyDead) return;
 			Enemystats->EnemyHealthChange(FinalDamage);
 			UE_LOG(LogTemp, Display, TEXT("Damage given: %f"), FinalDamage) 
 		}

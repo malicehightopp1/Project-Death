@@ -26,6 +26,14 @@ void UCharacterStatsComp::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	Attributes.Vitality = 1;
+	Attributes.Endurance = 1;
+	Attributes.Mind = 1;
+	Attributes.Dexterity = 1;
+	Attributes.Strength = 1;
+
+	RecalculateDerivedStats();
+	
 	//Starting Health Values
 	MaxHealth = 100.0f;
 	CurrentHealth = MaxHealth;
@@ -128,12 +136,6 @@ void UCharacterStatsComp::RecalculateDerivedStats()
 		CurrentMana = FMath::Clamp(CurrentMana, 0.f, MaxMana);
 		OnFPChanged.Broadcast(CurrentMana, MaxMana);
 	}
-	if (const FAttributeStatRow* Row = Lookup(Attributes.Mind))
-	{
-		MaxMana = Row->MindMana + EquipmentBonusMana;
-		CurrentMana = FMath::Clamp(CurrentMana, 0.f, MaxMana);
-		OnFPChanged.Broadcast(CurrentMana, MaxMana);
-	}
 }
 #pragma region XpAndLeveling 
 void UCharacterStatsComp::OnXpChange(float mXpAddAmount)
@@ -198,7 +200,7 @@ int64 UCharacterStatsComp::CalculateXpCostForNextLevel(int32 Level)
 void UCharacterStatsComp::OnHealthChange(float mHealthAddAmount)
 {
 	if (bIsInvinciable) return;
-	
+
 	CurrentHealth -= mHealthAddAmount;
 	CurrentHealth = FMath::Clamp(CurrentHealth, 0, MaxHealth);
 	if (CurrentHealth <= 0)
@@ -218,6 +220,7 @@ void UCharacterStatsComp::StartHitStun()
 	ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
 	if (!OwnerCharacter) return;
 
+	bIsStunned = true;
 	OwnerCharacter->GetCharacterMovement()->StopMovementImmediately();
 	OwnerCharacter->GetCharacterMovement()->DisableMovement();
 
@@ -236,6 +239,7 @@ void UCharacterStatsComp::EndHitStun()
 	ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
 	if (!OwnerCharacter) return;
 
+	bIsStunned = false;
 	if (!bIsPlayerDead)
 	{
 		OwnerCharacter->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
@@ -244,8 +248,26 @@ void UCharacterStatsComp::EndHitStun()
 void UCharacterStatsComp::PlayerDeath()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Player has died!!!"))
-	
+	bIsPlayerDead = true;
 	OnDeath.Broadcast();
+	ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
+	if (OwnerCharacter)
+	{
+		OwnerCharacter->GetCharacterMovement()->DisableMovement();
+		OwnerCharacter->GetCharacterMovement()->StopMovementImmediately();
+	}
+	if (DeathMontage)
+	{
+		USkeletalMeshComponent* Mesh = GetOwner()->FindComponentByClass<USkeletalMeshComponent>();
+		if (Mesh)
+		{
+			UAnimInstance* AnimInstance = Mesh->GetAnimInstance();
+			if (AnimInstance)
+			{
+				AnimInstance->Montage_Play(DeathMontage); //play this animation then call the death from an anim notify 
+			}
+		}
+	}
 }
 #pragma endregion PlayerHealth
 #pragma region PlayerStamina
@@ -253,6 +275,8 @@ void UCharacterStatsComp::OnStaminaChange(float NewStamina)
 {
 	CurrentStamina = FMath::Max(CurrentStamina - NewStamina, 0.f);
 	RegenDelayTimer = RegenDelay; // reset the delay every time stamina is spent
+	StaminaRegen = MaxStamina / 10;
+	UE_LOG(LogTemp,Warning,TEXT("StaminaRegen = %f"),StaminaRegen);
 	OnStaminaChanged.Broadcast(CurrentStamina, MaxStamina);
 }
 

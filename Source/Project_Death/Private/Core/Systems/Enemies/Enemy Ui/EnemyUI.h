@@ -15,19 +15,36 @@ class UEnemyUI : public UUserWidget
 	virtual void NativeConstruct() override; //treated as begin play starts when added to viewport
 
 public:
-	//Health bar visability
-	UPROPERTY(EditAnywhere, Category = "UI") float HideDelay = 10.0f;
-	UPROPERTY() FTimerHandle HideTimerHandle;
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/// Health bar visability ------------------------------------------------------------------------------------------
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	//visability functions
 	UFUNCTION() void ShowHealthBar();
 	UFUNCTION() void HideHealthBar();
 
-	//Start up functions
+	//visability variables
+	UPROPERTY(EditAnywhere, Category = "UI") float HideDelay = 10.0f;
+	UPROPERTY() FTimerHandle HideTimerHandle;
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/// start up function ----------------------------------------------------------------------------------------------
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	//init function
 	UFUNCTION(BlueprintCallable, Category = "EnemyUI") void InitwithOwner(AActor* InownerActor);
 
-	//health functions
-	UFUNCTION(BlueprintCallable, Category = "Stats | Health") void OnHealthChanged(float NewHealth, float MaxHealth);
-	
+	//init variable
 	UPROPERTY() AActor* OwnerActor = nullptr;
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/// health UI ------------------------------------------------------------------------------------------------------
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	//Health function
+	UFUNCTION(BlueprintCallable, Category = "Stats | Health") void OnHealthChanged(float NewHealth, float MaxHealth);
+
+	//health components
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget)) class UProgressBar* EnemyHealthBar;
 
 };

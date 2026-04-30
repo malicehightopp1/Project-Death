@@ -2,9 +2,6 @@
 
 
 #include "Core/Systems/Enemies/Enemy Ui/EnemyUI.h"
-
-#include <gsl/pointers>
-
 #include "Components/ProgressBar.h"
 #include "Core/Systems/Enemies/Enemy Stats/EnemyBaseStatsComp.h"
 
@@ -12,7 +9,6 @@
 void UEnemyUI::NativeConstruct()
 {
 	Super::NativeConstruct();
-	
 	if (OwnerActor)
 	{
 		UEnemyBaseStatsComp* enemystats = OwnerActor->FindComponentByClass<UEnemyBaseStatsComp>();
@@ -24,10 +20,9 @@ void UEnemyUI::NativeConstruct()
 		enemystats->OnHealthChanged.AddDynamic(this, &UEnemyUI::OnHealthChanged);
 		OnHealthChanged(enemystats->EnemyCurrentHealth, enemystats->EnemyMaxHealth);
 	}
-
 	HideHealthBar(); //by default off
 }
-
+#pragma region Health bar visability 
 void UEnemyUI::ShowHealthBar()
 {
 	if (EnemyHealthBar)
@@ -44,6 +39,8 @@ void UEnemyUI::HideHealthBar()
 	}
 }
 
+#pragma endregion
+#pragma region Initilizing UI
 void UEnemyUI::InitwithOwner(AActor* InownerActor)
 {
 	OwnerActor = InownerActor;
@@ -63,7 +60,8 @@ void UEnemyUI::InitwithOwner(AActor* InownerActor)
 	OnHealthChanged(enemystats->EnemyCurrentHealth, enemystats->EnemyMaxHealth);
 	HideHealthBar(); //hide until enemy hit
 }
-
+#pragma endregion
+#pragma region Health management
 void UEnemyUI::OnHealthChanged(float NewHealth, float MaxHealth)
 {
 	if (!EnemyHealthBar)
@@ -76,3 +74,4 @@ void UEnemyUI::OnHealthChanged(float NewHealth, float MaxHealth)
 	GetWorld()->GetTimerManager().ClearTimer(HideTimerHandle);
 	GetWorld()->GetTimerManager().SetTimer(HideTimerHandle, this, &UEnemyUI::HideHealthBar, HideDelay, false);
 }
+#pragma endregion
