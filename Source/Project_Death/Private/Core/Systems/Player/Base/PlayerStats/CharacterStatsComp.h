@@ -49,6 +49,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam (FOnStatPointsChanged, int32, Remain
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnXpChanged, float, NewXP, float, MaxXP);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSprintChanged, bool, bSprinting);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAttributesChanged, FCharacterAttributes, NewAttributes);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnHitReact);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent), Blueprintable)
 class UCharacterStatsComp : public UActorComponent
@@ -130,7 +131,8 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Character Stats | CharacterHealth") float CurrentHealth = 0;
 	UPROPERTY(BlueprintReadOnly, Category = "Character Stats | CharacterHealth") float MaxHealth = 0;
 	UPROPERTY(BlueprintReadOnly, Category = "Character Stats | CharacterHealth") bool bIsPlayerDead = false;
-	
+	UPROPERTY(BlueprintReadOnly, Category = "Character Stats | CharacterHealth") bool bIsInvinciable = false;
+
 	//Health Delegates 
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Character Stats | CharacterHealth") FOnHealthChanged OnHealthChanged;
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Character Stats | CharacterHealth") FOnDeath OnDeath;
@@ -180,6 +182,17 @@ public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Character Stats | CharacterMana") FOnFPChanged OnFPChanged; 
 	
 	UPROPERTY(BlueprintReadOnly, Category = "Character Stats | CharacterDamage") float BaseDamage = 10;
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/// player stun-----------------------------------------------------------------------------------------------------
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	UPROPERTY(EditAnywhere, Category = "Combat") float HitStunDuration = 0.3f;
+
+	UPROPERTY(BlueprintAssignable, Category = "Combat")FOnHitReact OnHitReact;
+	UPROPERTY() FTimerHandle HitStunTimerHandle;
+
+	UFUNCTION() void StartHitStun();
+	UFUNCTION() void EndHitStun();
 private:
 	UFUNCTION() void PlayerLevelUp();
 	UFUNCTION() static int64 CalculateXpCostForNextLevel(int32 Level);

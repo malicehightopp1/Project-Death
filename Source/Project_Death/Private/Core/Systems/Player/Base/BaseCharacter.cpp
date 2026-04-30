@@ -8,14 +8,12 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "Components/WidgetComponent.h"
 #include "Core/Systems/Enemies/Enemy Stats/EnemyBaseStatsComp.h"
 #include "Core/Systems/Interactions/InteractionManager.h"
 #include "Core/Systems/Player/Inventory/InventoryManager.h"
 #include "Core/Systems/Player/PlayerUI/PlayerWidget.h"
 #include "Engine/OverlapResult.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "Kismet/KismetSystemLibrary.h"
 #include "PlayerStats/CharacterStatsComp.h"
 
 // Sets default values
@@ -67,14 +65,27 @@ void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (PlayerWidget) //settng player widget Will make a change to a UserWidget C++ class
+	if (PlayerWidgetClass) // was checking PlayerWidget instance not the class
 	{
 		PlayerWidget = CreateWidget<UPlayerWidget>(GetWorld(), PlayerWidgetClass);
-		PlayerWidget->AddToViewport();
+		if (PlayerWidget)
+		{
+			PlayerWidget->AddToViewport();
+		}
 	}
-	InventoryManagerRef = FindComponentByClass<UInventoryManager>(); //grabbing the inventory manager off the player
+
+	InventoryManagerRef = FindComponentByClass<UInventoryManager>();
 	CharacterStats = FindComponentByClass<UCharacterStatsComp>();
-	CharacterStats->OnSprintChanged.AddDynamic(this, &ABaseCharacter::OnSprintChanged);
+    
+	if (CharacterStats)
+	{
+		CharacterStats->OnSprintChanged.AddDynamic(this, &ABaseCharacter::OnSprintChanged);
+		CharacterStats->OnHitReact.AddDynamic(this, &ABaseCharacter::PlayHitReact); 
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("BaseCharacter: CharacterStatsComp not found — is it added to the Blueprint?"));
+	}
 }
 
 // Called every frame
@@ -156,6 +167,10 @@ void ABaseCharacter::PlayerDodge() //dodge for player
 
 	bIsDodging = true;
 
+	if (CharacterStats)
+	{
+		CharacterStats->bIsInvinciable = true;
+	}
 	// Get the direction based on player input
 	// Uses last movement input so dodge goes the direction you're moving
 	DodgeDirection = GetLastMovementInputVector();
@@ -176,6 +191,10 @@ void ABaseCharacter::PlayerDodgeEnd() //resetting the dodge *use this for anim n
 {
 	bIsDodging = false;
 	DodgeDirection = FVector::ZeroVector;
+	if (CharacterStats)
+	{
+		CharacterStats->bIsInvinciable = false;
+	}
 }
 #pragma endregion
 #pragma region Sprinting
@@ -260,5 +279,22 @@ void ABaseCharacter::LockRotation(bool bLock)
 {
 	PlayerMovementComponent->bOrientRotationToMovement = !bLock;
 	bUseControllerRotationYaw = bLock;
+}
+
+void ABaseCharacter::PlayHitReact()
+{
+	if (!HitReactMontage) return;
+	if (bIsDodging) return; // don't interrupt a dodge
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (!AnimInstance) return;
+
+	if (AnimInstance->Montage_IsPlaying(HitReactMontage)) return;
+
+	bIsAttacking = false; //so if the player gets stunned mid hit reset it
+	HitActorsThisSwing.Empty();
+	LockRotation(false);
+	
+	AnimInstance->Montage_Play(HitReactMontage);
 }
 #pragma endregion

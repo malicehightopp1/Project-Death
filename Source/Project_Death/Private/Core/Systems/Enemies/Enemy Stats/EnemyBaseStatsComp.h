@@ -9,6 +9,7 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnEnemyHealthChanged, float,  CurrentHealth, float,  MaxHealth);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyDeath, bool, IsDead);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnEnemyHitReact);
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class UEnemyBaseStatsComp : public UActorComponent
 {
@@ -17,15 +18,28 @@ class UEnemyBaseStatsComp : public UActorComponent
 public:	
 	// Sets default values for this component's properties
 	UEnemyBaseStatsComp();
-
-	UPROPERTY(EditAnywhere, Category = "Combat") UAnimMontage* hitreactMontage;
-
-	UPROPERTY(EditAnywhere, Category = "Combat") float HitStunDuration = 0.5f;
-
-	UPROPERTY() FTimerHandle HitStunTimerHandle;
 	UFUNCTION() void StartHitStun();
 	UFUNCTION() void EndHitStun();
 	UFUNCTION() void PlayHitreact();
+	UFUNCTION() void PlayDeathAndDestroy();
+
+	//anim montages
+	UPROPERTY(EditAnywhere, Category = "Enemy | Stunned") UAnimMontage* hitreactMontage;
+	UPROPERTY(EditAnywhere, Category = "Animation")UAnimMontage* DeathMontage;
+
+	//stunned variables
+	UPROPERTY(EditAnywhere, Category = "Enemy | Stunned") float HitStunDuration = 0.5f;
+	UPROPERTY(BlueprintReadOnly, Category = "Enemy | Stunned")bool bIsStunned = false;
+
+	//Timers
+	UPROPERTY() FTimerHandle HitStunTimerHandle;
+
+	//Delegates
+	UPROPERTY(BlueprintAssignable, Category = "Combat") FOnEnemyHitReact OnHitReact;
+
+	//destroyables
+	UPROPERTY(BlueprintReadWrite, Category = "Combat") AActor* EquippedWeapon;
+
 
 protected:
 	// Called when the game starts

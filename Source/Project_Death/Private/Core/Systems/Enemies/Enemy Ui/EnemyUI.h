@@ -15,7 +15,16 @@ class UEnemyUI : public UUserWidget
 	virtual void NativeConstruct() override; //treated as begin play starts when added to viewport
 
 public:
+	//Health bar visability
+	UPROPERTY(EditAnywhere, Category = "UI") float HideDelay = 10.0f;
+	UPROPERTY() FTimerHandle HideTimerHandle;
+	UFUNCTION() void ShowHealthBar();
+	UFUNCTION() void HideHealthBar();
+
+	//Start up functions
 	UFUNCTION(BlueprintCallable, Category = "EnemyUI") void InitwithOwner(AActor* InownerActor);
+
+	//health functions
 	UFUNCTION(BlueprintCallable, Category = "Stats | Health") void OnHealthChanged(float NewHealth, float MaxHealth);
 	
 	UPROPERTY() AActor* OwnerActor = nullptr;

@@ -3,6 +3,9 @@
 
 #include "Core/Systems/Player/Base/PlayerStats/CharacterStatsComp.h"
 
+#include "GameFramework/Character.h"
+#include "GameFramework/CharacterMovementComponent.h"
+
 // Sets default values for this component's properties
 UCharacterStatsComp::UCharacterStatsComp()
 {
@@ -144,6 +147,8 @@ void UCharacterStatsComp::OnXpChange(float mXpAddAmount)
 	}
 	OnXpChanged.Broadcast(CurrentXp, MaxXp);
 }
+
+
 void UCharacterStatsComp::PlayerLevelUp()
 {
 	CharacterLevel++;
@@ -192,15 +197,50 @@ int64 UCharacterStatsComp::CalculateXpCostForNextLevel(int32 Level)
 #pragma region PlayerHealth
 void UCharacterStatsComp::OnHealthChange(float mHealthAddAmount)
 {
+	if (bIsInvinciable) return;
+	
 	CurrentHealth -= mHealthAddAmount;
 	CurrentHealth = FMath::Clamp(CurrentHealth, 0, MaxHealth);
 	if (CurrentHealth <= 0)
 	{
 		PlayerDeath();
 	}
+	else
+	{
+		StartHitStun(); // only stun if still alive
+		OnHitReact.Broadcast();
+	}
 	OnHealthChanged.Broadcast(CurrentHealth, MaxHealth);
 }
 
+void UCharacterStatsComp::StartHitStun()
+{
+	ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
+	if (!OwnerCharacter) return;
+
+	OwnerCharacter->GetCharacterMovement()->StopMovementImmediately();
+	OwnerCharacter->GetCharacterMovement()->DisableMovement();
+
+	GetWorld()->GetTimerManager().ClearTimer(HitStunTimerHandle);
+	GetWorld()->GetTimerManager().SetTimer(
+		HitStunTimerHandle,
+		this,
+		&UCharacterStatsComp::EndHitStun,
+		HitStunDuration,
+		false
+	);
+}
+
+void UCharacterStatsComp::EndHitStun()
+{
+	ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
+	if (!OwnerCharacter) return;
+
+	if (!bIsPlayerDead)
+	{
+		OwnerCharacter->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+	}
+}
 void UCharacterStatsComp::PlayerDeath()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Player has died!!!"))

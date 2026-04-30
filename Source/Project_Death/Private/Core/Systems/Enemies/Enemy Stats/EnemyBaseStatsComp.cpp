@@ -45,7 +45,7 @@ void UEnemyBaseStatsComp::EnemyHealthChange(float DamageToTake)
 	if (EnemyCurrentHealth <= 0)
 	{
 		bIsEnemyDead = true;
-		EnemyDeath();
+		PlayDeathAndDestroy();
 		OnDeathChanged.Broadcast(true);
 	}
 	else
@@ -67,6 +67,12 @@ void UEnemyBaseStatsComp::EnemyDeath()
 				{
 					playerstats->OnXpChange(XpToGive); //giving xp on death
 					bIsEnemyDead = false;
+					
+					if (EquippedWeapon && IsValid(EquippedWeapon))
+					{
+						EquippedWeapon->Destroy();
+						EquippedWeapon = nullptr;
+					}
 					AActor* actor = GetOwner();
 					actor->Destroy();
 				}
@@ -80,6 +86,7 @@ void UEnemyBaseStatsComp::StartHitStun()
 	ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
 	if (!OwnerCharacter) return;
 
+	bIsStunned = true;
 	// Stop all movement immediately
 	OwnerCharacter->GetCharacterMovement()->StopMovementImmediately();
 	OwnerCharacter->GetCharacterMovement()->DisableMovement();
@@ -100,6 +107,7 @@ void UEnemyBaseStatsComp::EndHitStun()
 	ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
 	if (!OwnerCharacter) return;
 
+	bIsStunned = false;
 	// Only re-enable if still alive
 	if (!bIsEnemyDead)
 	{
@@ -109,6 +117,7 @@ void UEnemyBaseStatsComp::EndHitStun()
 
 void UEnemyBaseStatsComp::PlayHitreact()
 {
+	if (bIsEnemyDead) return;
 	if (!hitreactMontage) return;
 
 	// Get the skeletal mesh off the owning actor
@@ -121,5 +130,30 @@ void UEnemyBaseStatsComp::PlayHitreact()
 	if (AnimInstance->Montage_IsPlaying(hitreactMontage)) return;
 
 	AnimInstance->Montage_Play(hitreactMontage);
+	OnHitReact.Broadcast();
+}
+
+void UEnemyBaseStatsComp::PlayDeathAndDestroy()
+{
+	bIsEnemyDead = true;
+	ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
+	if (OwnerCharacter)
+	{
+		OwnerCharacter->GetCharacterMovement()->DisableMovement();
+		OwnerCharacter->GetCharacterMovement()->StopMovementImmediately();
+	}
+
+	if (DeathMontage)
+	{
+		USkeletalMeshComponent* Mesh = GetOwner()->FindComponentByClass<USkeletalMeshComponent>();
+		if (Mesh)
+		{
+			UAnimInstance* AnimInstance = Mesh->GetAnimInstance();
+			if (AnimInstance)
+			{
+				AnimInstance->Montage_Play(DeathMontage);
+			}
+		}
+	}
 }
 

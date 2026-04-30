@@ -24,7 +24,26 @@ void UEnemyUI::NativeConstruct()
 		enemystats->OnHealthChanged.AddDynamic(this, &UEnemyUI::OnHealthChanged);
 		OnHealthChanged(enemystats->EnemyCurrentHealth, enemystats->EnemyMaxHealth);
 	}
+
+	HideHealthBar(); //by default off
 }
+
+void UEnemyUI::ShowHealthBar()
+{
+	if (EnemyHealthBar)
+	{
+		EnemyHealthBar->SetVisibility(ESlateVisibility::Visible);
+	}
+}
+
+void UEnemyUI::HideHealthBar()
+{
+	if (EnemyHealthBar)
+	{
+		EnemyHealthBar->SetVisibility(ESlateVisibility::Hidden);
+	}
+}
+
 void UEnemyUI::InitwithOwner(AActor* InownerActor)
 {
 	OwnerActor = InownerActor;
@@ -42,6 +61,7 @@ void UEnemyUI::InitwithOwner(AActor* InownerActor)
 	enemystats->OnHealthChanged.AddDynamic(this, &UEnemyUI::OnHealthChanged);
 	
 	OnHealthChanged(enemystats->EnemyCurrentHealth, enemystats->EnemyMaxHealth);
+	HideHealthBar(); //hide until enemy hit
 }
 
 void UEnemyUI::OnHealthChanged(float NewHealth, float MaxHealth)
@@ -51,4 +71,8 @@ void UEnemyUI::OnHealthChanged(float NewHealth, float MaxHealth)
 		UE_LOG(LogTemp, Warning, TEXT("Health Bar is NULL"))
 	}
 	EnemyHealthBar->SetPercent(NewHealth / MaxHealth);
+	ShowHealthBar(); //show on damage
+
+	GetWorld()->GetTimerManager().ClearTimer(HideTimerHandle);
+	GetWorld()->GetTimerManager().SetTimer(HideTimerHandle, this, &UEnemyUI::HideHealthBar, HideDelay, false);
 }
