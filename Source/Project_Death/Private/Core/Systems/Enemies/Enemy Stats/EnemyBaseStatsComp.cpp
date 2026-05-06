@@ -71,8 +71,8 @@ void UEnemyBaseStatsComp::EnemyHealthChange(float DamageToTake)
 	if (EnemyCurrentHealth <= 0)
 	{
 		bIsEnemyDead = true;
-		PlayDeathAndDestroy();
 		OnDeathChanged.Broadcast(true);
+		PlayDeathAndDestroy();
 	}
 	else //if the enemy doesnt die stun them 
 	{
@@ -93,13 +93,13 @@ void UEnemyBaseStatsComp::EnemyDeath()
 				if (bIsEnemyDead)
 				{
 					playerstats->OnXpChange(XpToGive); //giving xp on death
-					bIsEnemyDead = false;
 					
 					if (EquippedWeapon && IsValid(EquippedWeapon)) //destroying the enemies weapon along with the mesh when killed
 					{
 						EquippedWeapon->Destroy();
 						EquippedWeapon = nullptr;
 					}
+					bIsEnemyDead = false;
 					AActor* actor = GetOwner();
 					actor->Destroy();
 				}

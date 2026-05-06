@@ -72,6 +72,7 @@ private:
 	/// Dodge ----------------------------------------------------------------------------------------------------------
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	UFUNCTION(BlueprintCallable, Category = "Movement") void PlayerDodge();
+	UFUNCTION(BlueprintCallable, Category = "Movement") void PlayerDodgeStart();
 	UFUNCTION(BlueprintCallable, Category = "Movement") void PlayerDodgeEnd();
 	
 	UPROPERTY(EditDefaultsOnly, Category = "Movement") float SprintSpeed = 600.f;

@@ -165,13 +165,9 @@ void ABaseCharacter::PlayerDodge() //dodge for player
 {
 	if (InventoryManagerRef && InventoryManagerRef->bIsInventoryOpen) return; //dont allow when inventory open
 	if (bIsDodging) return; //don't allow player to dodge if already dodging
-
+	if (CharacterStats->bIsStunned) return;
+	
 	bIsDodging = true;
-
-	if (CharacterStats)
-	{
-		CharacterStats->bIsInvinciable = true;
-	}
 	// Get the direction based on player input
 	// Uses last movement input so dodge goes the direction you're moving
 	DodgeDirection = GetLastMovementInputVector();
@@ -186,6 +182,14 @@ void ABaseCharacter::PlayerDodge() //dodge for player
 
 	//LaunchCharacter(DodgeDirection * DodgeForce, true, true);
 	SetActorRotation(DodgeDirection.ToOrientationRotator());
+}
+
+void ABaseCharacter::PlayerDodgeStart()
+{
+	if (CharacterStats)
+	{
+		CharacterStats->bIsInvinciable = true;
+	}
 }
 
 void ABaseCharacter::PlayerDodgeEnd() //resetting the dodge *use this for anim notify*
