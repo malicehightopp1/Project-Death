@@ -94,11 +94,16 @@ public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Enemy | Delegates") FOnEnemyHealthChanged OnHealthChanged;
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	/// enemy xp to give -----------------------------------------------------------------------------------------------
+	/// enemy items to give --------------------------------------------------------------------------------------------
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	//base xp
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enemy Death") float XpToGive = 20;
+
+	///base money
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Enemy Death") float CoinsToGive = 100;
+
+	
 
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// Enemy level ----------------------------------------------------------------------------------------------------

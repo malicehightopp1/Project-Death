@@ -3,6 +3,7 @@
 
 #include "Core/Systems/Enemies/Enemy Stats/EnemyBaseStatsComp.h"
 
+#include "Core/Systems/Player/Base/PlayerCurrency/CurrencyManager.h"
 #include "Core/Systems/Player/Base/PlayerStats/CharacterStatsComp.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -90,9 +91,11 @@ void UEnemyBaseStatsComp::EnemyDeath()
 		{
 			if(UCharacterStatsComp* playerstats = Pawn->FindComponentByClass<UCharacterStatsComp>())
 			{
+				UCurrencyManager* Playercurrency = Pawn->GetComponentByClass<UCurrencyManager>();
 				if (bIsEnemyDead)
 				{
 					playerstats->OnXpChange(XpToGive); //giving xp on death
+					Playercurrency->OnCurrencyChange(CoinsToGive);
 					
 					if (EquippedWeapon && IsValid(EquippedWeapon)) //destroying the enemies weapon along with the mesh when killed
 					{
@@ -137,6 +140,7 @@ void UEnemyBaseStatsComp::StartHitStun()
 {
 	ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
 	if (!OwnerCharacter) return;
+	if (bIsEnemyDead) return;
 
 	bIsStunned = true;
 	OwnerCharacter->GetCharacterMovement()->StopMovementImmediately();
@@ -150,6 +154,10 @@ void UEnemyBaseStatsComp::StartHitStun()
 		HitStunDuration,
 		false
 	);
+	if (!bIsEnemyDead)
+	{
+		OwnerCharacter->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+	}
 }
 
 void UEnemyBaseStatsComp::EndHitStun()
