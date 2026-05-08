@@ -77,7 +77,7 @@ void AShopSystem::InteractPure(ABaseCharacter* player) //interaction
 	ABaseCharacter* character = Cast<ABaseCharacter>(PC->GetPawn());
 	
 	UInventoryManager* inventory = character->FindComponentByClass<UInventoryManager>();
-	if (bPlayerInRange && bShopOpen == false) // turn on the UI
+	if (bPlayerInRange && bShopOpen == false && inventory->bIsInventoryOpen == false) // turn on the UI
 	{
 		SetupShopSystem();
 		bShopOpen = true;
@@ -86,6 +86,9 @@ void AShopSystem::InteractPure(ABaseCharacter* player) //interaction
 			PC->SetShowMouseCursor(true);
 			PC->SetIgnoreMoveInput(true);
 			PC->SetIgnoreLookInput(true);
+
+			FInputModeGameAndUI InputMode;
+			PC->SetInputMode(InputMode);
 		}
 	}
 	else if (bShopOpen == true) //if shop is active turn it off
@@ -100,6 +103,9 @@ void AShopSystem::InteractPure(ABaseCharacter* player) //interaction
 			PC->SetIgnoreMoveInput(false);
 			PC->SetIgnoreLookInput(false);
 			PC->bShowMouseCursor = false;
+			
+			FInputModeGameOnly InputMode;
+			PC->SetInputMode(InputMode);
 		}
 	}
 }

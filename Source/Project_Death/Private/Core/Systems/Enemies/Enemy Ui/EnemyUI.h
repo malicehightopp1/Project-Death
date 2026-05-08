@@ -7,6 +7,8 @@
 #include "EnemyUI.generated.h"
 
 
+class UTextBlock;
+
 UCLASS()
 class UEnemyUI : public UUserWidget
 {
@@ -46,5 +48,14 @@ public:
 
 	//health components
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (BindWidget)) class UProgressBar* EnemyHealthBar;
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/// Enemy Level ----------------------------------------------------------------------------------------------------
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	//EnemyLevel function
+	UFUNCTION() void UpdateLevelDisplay(int32 Level);
+	UPROPERTY(meta = (BindWidget)) UTextBlock* EnemyLevelText;
+	
 
 };

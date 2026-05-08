@@ -38,6 +38,7 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	UPROPERTY(BlueprintReadWrite, Category = "Shop System | UI") UWidgetComponent* WidgetDetectionComponent;
 
 private:
 	//UI functions
@@ -62,7 +63,6 @@ private:
 	
 	//Components
 	UPROPERTY(EditDefaultsOnly, Category = "Shop System | Components") USphereComponent* SphereDetectionComponent;
-	UPROPERTY(EditDefaultsOnly, Category = "Shop System | UI") UWidgetComponent* WidgetDetectionComponent;
 	UPROPERTY(EditDefaultsOnly, Category = "Shop System | Components") UBoxComponent* BoxDetectionComponent;
 
 	//Defaults

@@ -3,6 +3,7 @@
 
 #include "Core/Systems/Player/Base/PlayerStats/CharacterStatsComp.h"
 
+#include "Core/Systems/Player/Base/BaseCharacter.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
@@ -217,6 +218,8 @@ void UCharacterStatsComp::OnHealthChange(float mHealthAddAmount)
 
 void UCharacterStatsComp::StartHitStun()
 {
+	ABaseCharacter* Player = Cast<ABaseCharacter>(GetOwner());
+	Player->bIsAttacking = true;
 	ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
 	if (!OwnerCharacter) return;
 
@@ -236,6 +239,8 @@ void UCharacterStatsComp::StartHitStun()
 
 void UCharacterStatsComp::EndHitStun()
 {
+	ABaseCharacter* Player = Cast<ABaseCharacter>(GetOwner());
+	Player->bIsAttacking = false;
 	ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
 	if (!OwnerCharacter) return;
 

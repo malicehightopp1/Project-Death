@@ -127,11 +127,16 @@ private:
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// Respawn --------------------------------------------------------------------------------------------------------
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+	//functions
 	UFUNCTION(BlueprintCallable, Category = "Player | Respawn") void OnPlayerDeath();
 	UFUNCTION(BlueprintCallable, Category = "Player | Respawn") void StartRespawnCountdown();
 	UFUNCTION(BlueprintCallable, Category = "Player | Respawn") void PlayerRespawn();
+
+	//respawn pointss
 	ARespawnPoints* FindClosestRespawnPoint() const;
 
+	//respawn timer
 	UPROPERTY() FTimerHandle RespawnTimer;
 	UPROPERTY(EditDefaultsOnly, Category = "Player | Respawn") float RespawnDelay = 10.0f;
 };

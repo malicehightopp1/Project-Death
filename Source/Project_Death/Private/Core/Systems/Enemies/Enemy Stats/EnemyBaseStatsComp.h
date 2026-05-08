@@ -122,5 +122,5 @@ protected:
 public:	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 private:
-	//enemy death
+	UPROPERTY() FTimerHandle DeathTimer;
 };

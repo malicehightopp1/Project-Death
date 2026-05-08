@@ -3,10 +3,14 @@
 
 #include "Core/Systems/Enemies/Enemy Stats/EnemyBaseStatsComp.h"
 
+#include "AIController.h"
+#include "BrainComponent.h"
 #include "Core/Systems/Player/Base/PlayerCurrency/CurrencyManager.h"
 #include "Core/Systems/Player/Base/PlayerStats/CharacterStatsComp.h"
 #include "GameFramework/Character.h"
 #include "GameFramework/CharacterMovementComponent.h"
+
+class AAIController;
 
 UEnemyBaseStatsComp::UEnemyBaseStatsComp()
 {
@@ -30,7 +34,7 @@ void UEnemyBaseStatsComp::BeginPlay()
 void UEnemyBaseStatsComp::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
+	
 }
 
 void UEnemyBaseStatsComp::InitStatsFromLevel(int32 Level)
@@ -64,6 +68,8 @@ float UEnemyBaseStatsComp::CalculateEnemyHealth(float level)
 #pragma region Enemy Health
 void UEnemyBaseStatsComp::EnemyHealthChange(float DamageToTake)
 {
+	if (bIsEnemyDead) return; //dont allow damage if enemy is dead
+	
 	EnemyCurrentHealth -= DamageToTake;
 
 	EnemyCurrentHealth = FMath::Clamp(EnemyCurrentHealth, 0 , EnemyMaxHealth);
@@ -117,6 +123,11 @@ void UEnemyBaseStatsComp::PlayDeathAndDestroy()
 	ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
 	if (OwnerCharacter)
 	{
+		if (AAIController* AICon = Cast<AAIController>(OwnerCharacter->GetController()))
+		{
+			AICon->StopMovement();
+			AICon->BrainComponent->StopLogic("Dead"); // stops the behavior tree entirely
+		}
 		OwnerCharacter->GetCharacterMovement()->DisableMovement();
 		OwnerCharacter->GetCharacterMovement()->StopMovementImmediately();
 	}
@@ -129,6 +140,7 @@ void UEnemyBaseStatsComp::PlayDeathAndDestroy()
 			UAnimInstance* AnimInstance = Mesh->GetAnimInstance();
 			if (AnimInstance)
 			{
+				AnimInstance->StopAllMontages(0.1f);
 				AnimInstance->Montage_Play(DeathMontage); //play this animation then call the death from an anim notify 
 			}
 		}
@@ -138,6 +150,7 @@ void UEnemyBaseStatsComp::PlayDeathAndDestroy()
 #pragma region Enemy Stun
 void UEnemyBaseStatsComp::StartHitStun()
 {
+	if (bIsStunned) return;
 	ACharacter* OwnerCharacter = Cast<ACharacter>(GetOwner());
 	if (!OwnerCharacter) return;
 	if (bIsEnemyDead) return;
@@ -154,10 +167,6 @@ void UEnemyBaseStatsComp::StartHitStun()
 		HitStunDuration,
 		false
 	);
-	if (!bIsEnemyDead)
-	{
-		OwnerCharacter->GetCharacterMovement()->SetMovementMode(MOVE_Walking);
-	}
 }
 
 void UEnemyBaseStatsComp::EndHitStun()
