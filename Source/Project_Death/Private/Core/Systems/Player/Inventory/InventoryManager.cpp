@@ -197,7 +197,6 @@ void UInventoryManager::Inventory() //for turning on and off the UI
 	if (InventoryWidgetInstance && InventoryWidgetInstance->IsInViewport() && bIsInventoryOpen == true) //checking if open, close it
 	{
 		InventoryWidgetInstance->RemoveFromParent();
-		InventoryWidgetInstance = nullptr;
 		bIsInventoryOpen = false;
 
 		PC->SetShowMouseCursor(false);

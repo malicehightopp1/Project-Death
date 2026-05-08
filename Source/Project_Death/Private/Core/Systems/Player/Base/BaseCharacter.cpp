@@ -12,9 +12,12 @@
 #include "Core/Systems/Interactions/InteractionManager.h"
 #include "Core/Systems/Player/Inventory/InventoryManager.h"
 #include "Core/Systems/Player/PlayerUI/PlayerWidget.h"
+#include "Core/Systems/Player/RespawnPoints/RespawnPoints.h"
+#include "Core/Systems/ShopSystem/ShopSystem.h"
 #include "Engine/OverlapResult.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "PlayerCurrency/CurrencyManager.h"
 #include "PlayerStats/CharacterStatsComp.h"
 
 // Sets default values
@@ -65,7 +68,8 @@ ABaseCharacter::ABaseCharacter()
 void ABaseCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
+	CurrencyManagerComp = FindComponentByClass<UCurrencyManager>();
 	if (PlayerWidgetClass) // was checking PlayerWidget instance not the class
 	{
 		PlayerWidget = CreateWidget<UPlayerWidget>(GetWorld(), PlayerWidgetClass);
@@ -81,7 +85,9 @@ void ABaseCharacter::BeginPlay()
 	if (CharacterStats)
 	{
 		CharacterStats->OnSprintChanged.AddDynamic(this, &ABaseCharacter::OnSprintChanged);
-		CharacterStats->OnHitReact.AddDynamic(this, &ABaseCharacter::PlayHitReact); 
+		CharacterStats->OnHitReact.AddDynamic(this, &ABaseCharacter::PlayHitReact);
+
+		CharacterStats->OnDeath.AddDynamic(this, &ABaseCharacter::OnPlayerDeath);
 	}
 	else
 	{
@@ -152,11 +158,17 @@ void ABaseCharacter::Interact(const FInputActionValue& Value) //setting the defi
 
 void ABaseCharacter::InventoryToggle(const FInputActionValue& Value) //toggling the inventory off and on
 {
+	if (bIsPaused) return;
+	
+	AShopSystem* Shop = Cast<AShopSystem>(UGameplayStatics::GetActorOfClass(GetWorld(), AShopSystem::StaticClass()));
+	if (Shop && Shop->bShopOpen) return;
+		
 	if (!InventoryManagerRef)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("No Inventory Ref"))
 		return;
 	}
+	UE_LOG(LogTemp, Warning, TEXT("Inventory toggled"))
 	InventoryManagerRef->Inventory(); //turning inventory on from inventory manager
 }
 #pragma endregion
@@ -342,5 +354,104 @@ void ABaseCharacter::PlayHitReact()
 	LockRotation(false);
 	
 	AnimInstance->Montage_Play(HitReactMontage);
+}
+#pragma endregion
+#pragma region PlayerRespawn 
+void ABaseCharacter::OnPlayerDeath()
+{
+	StartRespawnCountdown();
+}
+
+void ABaseCharacter::StartRespawnCountdown()
+{
+	if (APlayerController* PC = Cast<APlayerController>(GetController()))
+	{
+		PC->DisableInput(PC);
+	}
+
+	GetWorld()->GetTimerManager().SetTimer(
+		RespawnTimer,
+		this,
+		&ABaseCharacter::PlayerRespawn,
+		RespawnDelay,
+		false
+	);
+}
+
+void ABaseCharacter::PlayerRespawn()
+{
+    ARespawnPoints* SpawnPoint = FindClosestRespawnPoint();
+    FVector SpawnLocation = SpawnPoint ? SpawnPoint->GetActorLocation() : GetActorLocation();
+    FRotator SpawnRotation = SpawnPoint ? SpawnPoint->GetActorRotation() : GetActorRotation();
+
+    if (CurrencyManagerComp)
+    {
+        int32 CurrentGold = CurrencyManagerComp->GetPlayerCurrentCurrency();
+        int32 Penalty = FMath::FloorToInt(CurrentGold * 0.5f); //get rid of half coinds
+        CurrencyManagerComp->OnCurrencyChange(Penalty);
+
+        UE_LOG(LogTemp, Warning, TEXT("Death penalty: lost %d gold. Remaining: %d"), Penalty, CurrentGold - Penalty);
+    }
+
+    SetActorLocation(SpawnLocation, false, nullptr, ETeleportType::TeleportPhysics);
+    SetActorRotation(SpawnRotation);
+
+    if (CharacterStats)
+    {
+        CharacterStats->CurrentHealth = CharacterStats->MaxHealth;
+        CharacterStats->CurrentStamina = CharacterStats->MaxStamina;
+        CharacterStats->CurrentMana = CharacterStats->MaxMana;
+        CharacterStats->bIsPlayerDead = false;
+        CharacterStats->bIsStunned = false;
+        CharacterStats->bIsInvinciable = false;
+
+        CharacterStats->OnHealthChanged.Broadcast(CharacterStats->CurrentHealth, CharacterStats->MaxHealth);
+        CharacterStats->OnStaminaChanged.Broadcast(CharacterStats->CurrentStamina, CharacterStats->MaxStamina);
+        CharacterStats->OnFPChanged.Broadcast(CharacterStats->CurrentMana, CharacterStats->MaxMana);
+    }
+
+    GetCharacterMovement()->SetMovementMode(MOVE_Walking);
+
+    if (APlayerController* PC = Cast<APlayerController>(GetController()))
+    {
+        PC->EnableInput(PC);
+    }
+
+    bIsAttacking = false;
+    bComboQueued = false;
+    bIsDodging = false;
+    ComboCount = 0;
+    HitActorsThisSwing.Empty();
+    LockRotation(false);
+
+    UE_LOG(LogTemp, Warning, TEXT("Player respawned at %s"), *SpawnLocation.ToString());
+}
+
+ARespawnPoints* ABaseCharacter::FindClosestRespawnPoint() const
+{
+	TArray<AActor*> RespawnPoints;
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ARespawnPoints::StaticClass(), RespawnPoints);
+
+	ARespawnPoints* Closest = nullptr;
+	float ClosestDistSq = FLT_MAX; //max value
+
+	for (AActor* Actor : RespawnPoints)
+	{
+		if (!Actor) continue;
+
+		float DistSq = FVector::DistSquared(GetActorLocation(), Actor->GetActorLocation());
+		if (DistSq < ClosestDistSq)
+		{
+			ClosestDistSq = DistSq;
+			Closest = Cast<ARespawnPoints>(Actor);
+		}
+	}
+
+	if (!Closest)
+	{
+		UE_LOG(LogTemp, Error, TEXT("FindClosestRespawnPoint: No RespawnPoints found in level!"));
+	}
+
+	return Closest;
 }
 #pragma endregion

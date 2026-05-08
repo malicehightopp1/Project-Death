@@ -60,14 +60,13 @@ public:
 	
 	UPROPERTY() UUserWidget* InventoryWidgetInstance; //instance of the class  for creating
 	UPROPERTY(EditDefaultsOnly, Category = "Player") TSubclassOf<UUserWidget> InventoryWidgetClass; //actual class reference
-	UPROPERTY(EditDefaultsOnly, Category = "Player") bool bIsInventoryOpen = false;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Player") bool bIsInventoryOpen = false;
 	
 	//UI Functions 
 	UFUNCTION(BlueprintPure, Category="Components|Inventory") TArray<FInventorySlot> GetAllSLots() const {return InventorySlots;}
 	UFUNCTION(BlueprintPure, Category="Components|Inventory") FInventorySlot GetSlotAtIndex(int32 SlotIndex) const;
 	UFUNCTION(BlueprintPure, Category="Components|Inventory") int32 GetMaxSlotIndex() const {return MaxSlots; }
 	UFUNCTION(BlueprintCallable, Category="Components|Inventory") void RefreshInventory();
-	
 	// ========================================================================================================
 	// ------ Config for inventory ----------------------------------------------------------------------------
 	// ========================================================================================================

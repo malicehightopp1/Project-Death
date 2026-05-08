@@ -8,6 +8,8 @@
 #include "GameFramework/Character.h"
 #include "BaseCharacter.generated.h"
 
+class ARespawnPoints;
+class UCurrencyManager;
 class UCharacterStatsComp;
 class UPlayerWidget;
 struct FInputActionValue;
@@ -42,6 +44,10 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Equipment") class UEquipmentManager* EquipmentManager;
 	UPROPERTY(EditDefaultsOnly, Category = "Player | Ref") UInventoryManager* InventoryManagerRef;	
 	UPROPERTY(BlueprintReadOnly) bool bIsAttacking = false;
+	
+	UPROPERTY(BlueprintReadWrite, Category = "State") bool bIsPaused = false; //from blueprint sync
+	FORCEINLINE UCurrencyManager* GetCurrencySystem() const {return CurrencyManagerComp;}
+	UPROPERTY() UCurrencyManager* CurrencyManagerComp;
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// Ui ------------------------------------------------------------------------------------------------------------
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -117,4 +123,15 @@ private:
 	/// interaction ----------------------------------------------------------------------------------------------------
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	UPROPERTY(EditAnywhere, Category = "Player | Interaction") float InteractionRange = 150.f;
+	
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/// Respawn --------------------------------------------------------------------------------------------------------
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	UFUNCTION(BlueprintCallable, Category = "Player | Respawn") void OnPlayerDeath();
+	UFUNCTION(BlueprintCallable, Category = "Player | Respawn") void StartRespawnCountdown();
+	UFUNCTION(BlueprintCallable, Category = "Player | Respawn") void PlayerRespawn();
+	ARespawnPoints* FindClosestRespawnPoint() const;
+
+	UPROPERTY() FTimerHandle RespawnTimer;
+	UPROPERTY(EditDefaultsOnly, Category = "Player | Respawn") float RespawnDelay = 10.0f;
 };

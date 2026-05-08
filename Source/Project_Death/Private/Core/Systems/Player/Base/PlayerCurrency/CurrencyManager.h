@@ -33,7 +33,8 @@ public:
 	
 	//Currency functions
 	UFUNCTION(BlueprintCallable, Category = "PlayerCurrency") void OnCurrencyChange(float NewCurrency);
-	
+
+	UFUNCTION(BlueprintCallable, Category = "PlayerStats") float GetPlayerCurrentCurrency(){return CurrentCurrency;}
 	//Currency Variables
 	UPROPERTY(EditDefaultsOnly, Category = "PlayerStats") float CurrentCurrency = 0;
 	UPROPERTY(EditDefaultsOnly, Category = "PlayerStats") float MaxCurrency = 999999;
