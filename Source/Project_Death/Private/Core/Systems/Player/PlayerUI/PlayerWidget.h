@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "PlayerWidget.generated.h"
 
+class UVerticalBox;
 class UOverlay;
 class UCanvasPanel;
 
@@ -18,7 +19,11 @@ class UPlayerWidget : public UUserWidget
 protected:
 	//Base for UI *HOLDERS*
 	UPROPERTY(EditAnywhere, meta = (BindWidget)) class UCanvasPanel* CanvasPanel;
-	
+
+	//Amount changing
+	UFUNCTION() void PickupNotify(float amount, FText label);
+	UPROPERTY(meta = (BindWidget)) UVerticalBox* NotifyBox;
+	UPROPERTY() TSubclassOf<UUserWidget> notifyClass;
 	//PlayerLevel 
 	UPROPERTY(EditAnywhere, meta = (BindWidget)) class UTextBlock* PlayerCurrentLevel;
 	UPROPERTY(EditAnywhere, meta = (BindWidget)) class UTextBlock* PlayerXp;

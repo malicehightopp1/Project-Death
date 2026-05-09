@@ -50,6 +50,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnXpChanged, float, NewXP, float, 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSprintChanged, bool, bSprinting);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAttributesChanged, FCharacterAttributes, NewAttributes);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnHitReact);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnXpPickup, float, amount, FText, Label);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent), Blueprintable)
 class UCharacterStatsComp : public UActorComponent
@@ -118,6 +119,7 @@ public:
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Stats | Level") FOnCharacterLevelUp OnLevelChange; 
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Stats | Level") FOnStatPointsChanged OnStatPointsChanged;
 	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Stats | Level") FOnXpChanged OnXpChanged;
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Stats | Level") FOnXpPickup OnXpPickup;
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	/// Health----------------------------------------------------------------------------------------------------------

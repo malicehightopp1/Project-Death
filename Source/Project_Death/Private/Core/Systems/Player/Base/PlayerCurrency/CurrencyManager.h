@@ -10,6 +10,7 @@
 /// delegates-------------------------------------------------------------------------------------------------------
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCurrencyChange , int32, NewCurrency);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnCurrencyPickup, int32, Amount, FText, Label);
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class UCurrencyManager : public UActorComponent
 {
@@ -40,6 +41,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "PlayerStats") float MaxCurrency = 999999;
 	
 	//Currency Delegates
-	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Character Stats | CharacterMana") FOnCurrencyChange OnCurrencyChanged;
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Character Stats | Character") FOnCurrencyChange OnCurrencyChanged;
+	UPROPERTY(BlueprintAssignable, BlueprintCallable, Category = "Character Stats | Character") FOnCurrencyPickup OnCurrencyPickup;
 
 };

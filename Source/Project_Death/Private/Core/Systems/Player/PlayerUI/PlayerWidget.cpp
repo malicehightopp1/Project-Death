@@ -6,6 +6,7 @@
 #include "Components/Image.h"
 #include "Components/ProgressBar.h"
 #include "Components/TextBlock.h"
+#include "Components/VerticalBox.h"
 #include "Components/VerticalBoxSlot.h"
 #include "Core/Systems/Player/Base/PlayerCurrency/CurrencyManager.h"
 #include "Core/Systems/Player/Base/PlayerStats/CharacterStatsComp.h"
@@ -48,6 +49,28 @@ void UPlayerWidget::NativeConstruct() //Begin play
 		
 	}, 0.1f, false);
 }
+
+void UPlayerWidget::PickupNotify(float amount, FText label)
+{
+	if (!NotifyBox) return;
+
+	UTextBlock* NotifText = NewObject<UTextBlock>(this);
+	NotifText->SetText(FText::Format(
+		NSLOCTEXT("Notify", "Key", "+ {0} {1}"),
+		FText::AsNumber(amount), label
+	));
+	NotifText->SetColorAndOpacity(FSlateColor(FLinearColor::Yellow));
+
+	NotifyBox->AddChild(NotifText);
+
+	FTimerHandle Handle;
+	GetWorld()->GetTimerManager().SetTimer(Handle, [NotifText]()
+	{
+		if (IsValid(NotifText))
+			NotifText->RemoveFromParent();
+	}, 2.5f, false);
+}
+
 void UPlayerWidget::OnLevelChanged(int32 NewCharacterLevel)
 {
 	if (!PlayerCurrentLevel) return;
@@ -69,6 +92,8 @@ void UPlayerWidget::OnXpChanged(float NewXp, float MaxXp)
 	
 	if (!PlayerXpBar) return;
 	PlayerXpBar->SetPercent(MaxXp > 0.f ? NewXp / MaxXp : 0.f);
+
+	PickupNotify(NewXp, FText::FromString("Xp"));
 }
 
 void UPlayerWidget::OnHealthChanged(float NewHealth, float MaxHealth)
@@ -109,4 +134,5 @@ void UPlayerWidget::OnCurrencyChange(int32 NewCurrency)
 		FText::AsNumber(NewCurrency));
 	
 	CurrencyText->SetText(FormattedCurrency);
+	PickupNotify(NewCurrency, FText::FromString("$"));
 }

@@ -142,6 +142,7 @@ void UCharacterStatsComp::RecalculateDerivedStats()
 void UCharacterStatsComp::OnXpChange(float mXpAddAmount)
 {
 	CurrentXp += mXpAddAmount;
+	OnXpPickup.Broadcast(mXpAddAmount, FText::FromString("XP")); //to tell the player how much they got
 	
 	while (CurrentXp >= MaxXp)
 	{

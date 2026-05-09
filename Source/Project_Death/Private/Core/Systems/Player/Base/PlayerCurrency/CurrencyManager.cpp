@@ -32,6 +32,7 @@ void UCurrencyManager::OnCurrencyChange(float NewCurrency)
 	CurrentCurrency += NewCurrency;
 	CurrentCurrency = FMath::Clamp(CurrentCurrency, 0.0f, MaxCurrency);
 	OnCurrencyChanged.Broadcast(CurrentCurrency);
+	OnCurrencyPickup.Broadcast(NewCurrency, FText::FromString("$"));
 	UE_LOG(LogTemp, Log, TEXT("Currency: %f"), CurrentCurrency);
 }
 
